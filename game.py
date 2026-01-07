@@ -16,7 +16,7 @@ class Game:
         
         pygame.display.set_caption("Senet Game")
         
-        icon = pygame.image.load("images\logo.png")
+        icon = pygame.image.load("images/logo.png")
         pygame.display.set_icon(icon)
         
         self.renderer = Renderer()
@@ -47,6 +47,12 @@ class Game:
                     self.undo()
                 elif event.key == pygame.K_r:
                     self.restart()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1: # Left click
+                    pos = pygame.mouse.get_pos()
+                    x, y = pos[0], pos[1]
+                    cell = self.renderer.get_cell_from_mouse(x, y)
+                    print(f"Pos:{pos}, Cell: {cell}")            
     
     def restart(self):
         pass
