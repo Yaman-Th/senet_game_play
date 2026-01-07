@@ -17,12 +17,20 @@ class ExpectiMinimaxPleyer:
 
     def _get_player_score(self, positions: frozenset) -> float:
         score = 0.0
+        House_of_Happiness = 26
         House_of_Water = 27
+        Trapped_Squares = {28, 29} # square you can get stuck in
         Total_Pawns = 7
+
         for pawn_pos in positions:
             if pawn_pos == House_of_Water:
                 score -= 50
-            
+
+            elif pawn_pos == House_of_Happiness:
+                score += 20
+
+            elif pawn_pos in Trapped_Squares:
+                score -= 25    
             else:
                 score += pawn_pos
 
@@ -42,4 +50,23 @@ class ExpectiMinimaxPleyer:
         white_score = self._get_player_score(state.white_positions)
 
         return black_score - white_score
+    
+    def expected_value(self,state :State, depth :int) ->float:
+        total_expected_value = 0.0
 
+        for sticks_roll, probability in self.probabilities.items():
+            roll_state = State(
+                white_positions = state.white_positions,
+                black_positions = state.black_positions,
+                current_player = state.current_player,
+                sticks = sticks_roll,
+                parent = state.parent
+
+            )
+
+            total_expected_value += self.get_value(roll_state, depth)* probability
+
+        return total_expected_value
+
+    def get_value(self, state: State, depth: int) -> float:
+        pass
