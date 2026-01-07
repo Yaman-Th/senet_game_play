@@ -52,12 +52,33 @@ class GameEngine:
         
         return True
 
-    def actions(self, state):
+    def actions(self, state:State):
         """
-        TODO: return a set of pawns that player can move
-        e.g: set (1, 3, 5, 7, 9, 11, 13) the black pawns
-             return set(1, 3) the avaliable moves
+        return a set of pawns that player can move
+        e.g: set (1, 3, 5, 7, 9, 11, 13) the pawns and sticks = 2
+             return set(13) the avaliable moves
         """
+        current_positions = set()
+        movable_positions = set()
+        if state.current_player == PlayerColor.BLACK:
+            current_positions = state.black_positions
+        else:
+            current_positions = state.white_positions
+        for current_position in current_positions:
+            new_position = current_position + state.sticks
+            if new_position in current_positions:
+                continue
+            elif new_position < 27:
+                movable_positions.add(current_position)
+            elif current_position == 26:
+                movable_positions.add(current_position)
+            elif current_position == 28 and state.sticks == 3:
+                movable_positions.add(current_position)
+            elif current_position == 29 and state.sticks == 2:
+                movable_positions.add(current_position)
+            elif current_position == 30:
+                movable_positions.add(current_position)
+        return movable_positions
 
 def test():
     black_set = {2, 4, 6, 8, 10, 12, 25}
