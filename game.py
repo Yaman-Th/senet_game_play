@@ -1,15 +1,21 @@
 import pygame
+from enum import Enum, auto
 from game_state import State
 from game_renderer.renderer import Renderer
 from copy import deepcopy
 from pygame.math import Vector2
 import time
 
+class Mode(Enum):
+    PLAYER_MODE = auto()
+    ALGORITHM_AND_PLAYER_MODE = auto()
+    ALGORITHM_MODE = auto()
+
 class Game:
     """
     Class that contain game loop
     """
-    def __init__(self):
+    def __init__(self, mode:Mode):
         pygame.init()
         self.inital_state = State()
         self.state = deepcopy(self.inital_state)
