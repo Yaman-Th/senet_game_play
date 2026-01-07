@@ -9,18 +9,18 @@ def main():
         print("First Usage: python ./main.py algorithm_and_player_mode")
         print("First Usage: python ./main.py algorithm_mode")
         sys.exit(1)
+    mode_input = sys.argv[1].lower()
     try:
-        match (sys.argv[1].lower):
-            case "player_mode":
-                game = Game(Mode.PLAYER_MODE)
-            case "algorithm_and_player_mode":
-                game = Game(Mode.ALGORITHM_AND_PLAYER_MODE)
-            case "algorithm_mode":
-                game = Game(Mode.ALGORITHM_MODE)
-        game.run()
+        if mode_input == "player_mode":
+            game = Game(Mode.PLAYER_MODE)
+        if mode_input == "algorithm_and_player_mode":
+            game = Game(Mode.ALGORITHM_AND_PLAYER_MODE)
+        if mode_input == "algorithm_mode":
+            game = Game(Mode.ALGORITHM_MODE)
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
+    game.run()
 
 if __name__ == '__main__':
     main()
