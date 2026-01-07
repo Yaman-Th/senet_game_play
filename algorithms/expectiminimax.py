@@ -10,24 +10,61 @@ class ExpectiMinimaxPleyer:
         self.probabilities = {1: 4/16, 2: 6/16, 3: 4/16, 4: 1/16, 5: 1/16}
         
     def find_best_move(self, state: State) -> int:
-        pass
+        possible_moves = self.game_engine.actions(state)
+        best_move = -1
+
+        if self.player_color == PlayerColor.BLACK:
+            best_value = -math.inf  
+            for move in possible_moves:
+                next_state = self.game_engine.transition_model(state, move)
+                if next_state is None:
+                    continue
+
+                # get expected value of the stat    e after move
+                value = self.expected_value(next_state, self.max_depth)
+                if value > best_value:
+                    best_value = value
+                    best_move = move
+            return best_move
+                
+        else:
+            best_value = math.inf
+            for move in possible_moves:
+                next_state = self.game_engine.transition_model(state, move)
+                if next_state is None:
+                    continue
+
+                value = self.expected_value(next_state, self.max_depth)
+                if value< best_value:
+                    best_value= value
+                    best_move = move
+            return best_move
+        
 
     def _is_game_over(self, state: State) -> bool:
         return not state.white_positions or not state.black_positions
 
     def _get_player_score(self, positions: frozenset) -> float:
         score = 0.0
+        House_of_Happiness = 26
         House_of_Water = 27
+        Trapped_Squares = {28, 29} # square you can get stuck in
         Total_Pawns = 7
+
         for pawn_pos in positions:
             if pawn_pos == House_of_Water:
                 score -= 50
-            
+
+            elif pawn_pos == House_of_Happiness:
+                score += 20
+
+            elif pawn_pos in Trapped_Squares:
+                score -= 25    
             else:
                 score += pawn_pos
 
         pawns_off_board = Total_Pawns - len(positions)
-        score += pawns_off_board *100
+        score += pawns_off_board * 100
 
         return score
     
@@ -42,4 +79,56 @@ class ExpectiMinimaxPleyer:
         white_score = self._get_player_score(state.white_positions)
 
         return black_score - white_score
+    
+    def expected_value(self,state :State, depth :int) ->float:
+        total_expected_value = 0.0
 
+        for sticks_roll, probability in self.probabilities.items():
+            roll_state = State(
+                white_positions = state.white_positions,
+                black_positions = state.black_positions,
+                current_player = state.current_player,
+                sticks = sticks_roll,
+                parent = state.parent
+
+            )
+
+            total_expected_value += self.get_value(roll_state, depth)* probability
+
+        return total_expected_value
+
+    def get_value(self, state: State, depth: int) -> float:
+        if depth == 0 or self._is_game_over(state):
+            return self.evaluate(state)
+        
+        possible_moves = self.game_engine.actions(state)
+        
+        if not possible_moves:
+            next_Player = PlayerColor.WHITE if state.current_player == PlayerColor.BLACK else PlayerColor.BLACK
+            skipped_state = State(state.white_positions, state.black_positions, next_Player, 0, state)
+            return self.expected_value(skipped_state, depth-1)
+        
+        # max player's turn(Black player)
+        if state.current_player == self.player_color:
+            max_value = -math.inf
+            for move in possible_moves:
+                next_state = self.game_engine.transition_model(state, move)
+                if next_state is None:
+                    continue
+                value = self.expected_value(next_state, depth-1)
+                max_value = max(max_value,value)
+
+            return max_value
+
+        #min player's turn(White player)
+        else:
+            min_value = math.inf
+            for move in possible_moves:
+                next_state = self.game_engine.transition_model(state, move)
+                if next_state is None:
+                    continue
+                value = self.expected_value(next_state, depth-1)
+                min_value = min(min_value, value)
+
+            return min_value
+        
