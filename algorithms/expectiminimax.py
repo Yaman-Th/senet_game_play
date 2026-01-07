@@ -35,7 +35,7 @@ class ExpectiMinimaxPleyer:
                 score += pawn_pos
 
         pawns_off_board = Total_Pawns - len(positions)
-        score += pawns_off_board *100
+        score += pawns_off_board * 100
 
         return score
     
@@ -69,4 +69,37 @@ class ExpectiMinimaxPleyer:
         return total_expected_value
 
     def get_value(self, state: State, depth: int) -> float:
-        pass
+        if depth == 0 or self._is_game_over(state):
+            return self.evaluate(state)
+        
+        possible_moves = self.game_engine.actions(state)
+        
+        if not possible_moves:
+            next_Player = PlayerColor.WHITE if state.current_player == PlayerColor.BLACK else PlayerColor.BLACK
+            skipped_state = State(state.white_positions, state.black_positions, next_Player, 0, state)
+        
+            return self.expected_value(skipped_state, depth-1)
+        
+        # max player's turn
+        if state.current_player == self.player_color:
+            max_value = -math.inf
+            for move in possible_moves:
+                next_state = self.game_engine.transition_model(state, move)
+                if next_state is None:
+                    continue
+                value = self.expected_value(next_state, depth-1)
+                max_value = max(max_value,value)
+
+            return max_value
+
+        #min player's turn
+        else:
+            for move in possible_moves:
+                next_state = self.game_engine.transition_model(state, move)
+                if next_state is None:
+                    continue
+            value = self.expected_value(next_state, depth-1)
+            min_value = min(min_value, value)
+
+            return min_value
+        
