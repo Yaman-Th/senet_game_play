@@ -19,3 +19,8 @@ class State:
         self.current_player = current_player
         self.sticks = sticks
         self.parent = parent
+        
+    def change_player(self):
+        next_player = PlayerColor.BLACK if self.current_player == PlayerColor.WHITE else PlayerColor.WHITE
+        self.current_player = next_player
+        self.sticks = 0

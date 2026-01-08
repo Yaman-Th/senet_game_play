@@ -9,14 +9,16 @@ class Data:
         self.module = cell + margin
         self.grid_c, self.grid_r = 1, 2
         self.grid_x, self.grid_y = self.get_coordinate(self.grid_r, self.grid_c)
-        self.elements = {15: (1, 5), 26: (2, 5), 27: (2, 6), 28: (2, 7), 29: (2, 8), 30: (2, 9), 0: (2, 10)}
+        self.elements = {15: (1, 5), 26: (2, 5), 27: (2, 6), 28: (2, 7), 29: (2, 8), 30: (2, 9)}
         self.colors = {
             'light': (221, 160, 98),
             'dark' : (240, 228, 216),
             'white': (255,252,242),
             'black': (27,18,4),
             'brown': (116,71,0),
-            'green': (26,178,19)
+            'green': (26,178,19),
+            'orange': (237,87,0),
+            'blue': (22,83,126),
         }
         self.positions = {
             0: (2, 10), 1: (0, 0), 2: (0, 1), 3: (0, 2), 4: (0, 3), 5: (0, 4), 6: (0, 5), 7: (0, 6), 8: (0, 7), 9: (0, 8), 10: (0, 9),
@@ -82,7 +84,7 @@ class Renderer:
         
         self.font = pygame.font.Font(None, 36)
         self.small_font = pygame.font.Font(None, 28)
-        self.sticks_font = pygame.font.Font(None, int(self.data.cell // 1.5)) 
+        self.sticks_font = pygame.font.Font(None, int(self.data.cell // 2.5)) 
         self.playerRadius = int(self.data.cell // 4)
         self.IMAGES = {
             15      : pygame.image.load(join('images', 'start_1.png')).convert_alpha(),   # start
@@ -95,7 +97,7 @@ class Renderer:
             "sticks": pygame.image.load(join('images', 'stick.png'  )).convert_alpha(),   # 4 sticks 
             }
     
-    def render(self, state, start_time):
+    def render(self, state, start_time, actions):
         """
         rendering all screen elements
         
@@ -105,11 +107,13 @@ class Renderer:
         self.screen.fill(self.data.colors['brown'])
         self.draw_grid()
         self.draw_elements()
+        self.draw_actions(actions)
         self.draw_players(state)
         # self.draw_sticks()
         self.draw_sticks_value(state)
         self.draw_current_player(state)
         self.draw_score(state)
+        self.draw_skip_button()
         pygame.display.update()
     
     def init_screen(self, w, h):
@@ -129,10 +133,8 @@ class Renderer:
     
     def draw_grid(self):
         
-        # Change color if mouse is hovering
-        mouse_pos = pygame.mouse.get_pos()
+        self.mouse_pos = pygame.mouse.get_pos()
                 
-        # draw cells
         for key, value in self.data.positions.items():
             r, c = value[0], value[1]
             x, y = self.data.get_coordinate(r, c)
@@ -146,7 +148,7 @@ class Renderer:
             
             pygame.draw.rect(self.screen, color, rect, border_radius=20)
             
-            if rect.collidepoint(mouse_pos):
+            if rect.collidepoint(self.mouse_pos):
                 # Draw only the outline (border)
                 # The 3rd argument (LINE_WIDTH) makes it an outline instead of a solid fill
                 pygame.draw.rect(self.screen, self.data.colors['green'], rect, 3, border_radius=20)
@@ -229,15 +231,26 @@ class Renderer:
         self.screen.blit(image, image_center)
     
     def draw_sticks_value(self, state:State):
-        text = str(state.sticks)
-        text_surface = self.sticks_font.render(text, True, self.data.colors['brown'])
-        
         r, c = self.data.positions[31][0], self.data.positions[31][1]
         x, y = self.data.move(self.data.get_coordinate(r, c))
         
-        cell_rect = pygame.Rect(x, y, self.data.cell, self.data.cell)
-        text_rect = text_surface.get_rect(center=cell_rect.center)
+        rect = pygame.Rect(x, y, self.data.cell, self.data.cell)
         
+        if rect.collidepoint(self.mouse_pos):
+            color = self.data.colors['blue']
+            text_color = self.data.colors['white']
+            text = "Toss !"
+        else:
+            color = self.data.colors['light']
+            text_color = self.data.colors['brown']
+            text = str(state.sticks)
+            
+        text_surface = self.sticks_font.render(text, True, text_color)
+        
+        
+        text_rect = text_surface.get_rect(center=rect.center)
+        
+        pygame.draw.rect(self.screen, color, rect, border_radius=20)
         self.screen.blit(text_surface, text_rect)
     
     def get_cell_from_mouse(self, x, y):
@@ -248,13 +261,48 @@ class Renderer:
         else:
             return None
     
-    def handle_events(self, event, sticks):
+    def draw_actions(self, actions):
+        # draw cells
+        for action in actions:
+            r, c = self.data.positions[action]
+            x, y = self.data.get_coordinate(r, c)
+            
+            color = self.data.colors['green']
+            rect = pygame.Rect(x, y, self.data.cell, self.data.cell).move(self.data.grid_x, self.data.grid_y)
+            pygame.draw.rect(self.screen, color, rect, border_radius=20)
+             
+    def draw_skip_button(self):
+        r, c = self.data.positions[0]
+        x, y = self.data.get_coordinate(r, c)
+
+        rect = pygame.Rect(x, y, self.data.cell, self.data.cell).move(self.data.grid_x, self.data.grid_y)
+        
+        if rect.collidepoint(self.mouse_pos):
+            color = self.data.colors['orange']
+            text_color = self.data.colors['white']
+        else:
+            color = self.data.colors['light']
+            text_color = self.data.colors['brown']
+        
+        pygame.draw.rect(self.screen, color, rect, border_radius=20)
+        
+        text_surface = self.sticks_font.render("SKIP", True, text_color)
+        text_rect = text_surface.get_rect(center=rect.center)
+        
+        self.screen.blit(text_surface, text_rect)
+    
+    def skip_turn(self, state:State):
+            state.change_player()
+            
+    def handle_events(self, event, sticks, state, actions):
         if event == 1:
             pos = pygame.mouse.get_pos()
             x, y = pos[0], pos[1]
             cell = self.get_cell_from_mouse(x, y)
             
-            if cell == 31 and sticks == 0:
+            if cell == 0 and not actions and sticks != 0:
+                self.skip_turn(state)
+            elif cell == 31 and sticks == 0:
                 return -1
             else:
                 print(f"Pos:{pos}, Cell: {cell}")
