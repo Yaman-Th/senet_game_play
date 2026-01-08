@@ -109,6 +109,7 @@ class Renderer:
         # self.draw_sticks()
         self.draw_sticks_value(state)
         self.draw_current_player(state)
+        self.draw_score(state)
         pygame.display.update()
     
     def init_screen(self, w, h):
@@ -191,6 +192,25 @@ class Renderer:
             color = self.data.colors['black']
             
         pygame.draw.rect(self.screen, color, rect, border_radius=20)
+    
+    def draw_score(self,state:State):
+        r, c = 0, 1
+        x, y = self.data.get_coordinate(r, c)
+        white_score = 7 - len(state.white_positions)
+        for i in range(white_score):
+            y = y + 6
+            player_center =  self.data.get_center(x, y, self.data.cell, self.data.cell)
+            pygame.draw.circle(self.screen, self.data.colors['light'], player_center, radius=self.playerRadius + 2)
+            pygame.draw.circle(self.screen, self.data.colors['white'], player_center, radius=self.playerRadius)
+        
+        r, c = 0, 2
+        x, y = self.data.get_coordinate(r, c)
+        black_score = 7 - len(state.black_positions)
+        for i in range(black_score):
+            y = y + 6
+            player_center =  self.data.get_center(x, y, self.data.cell, self.data.cell)
+            pygame.draw.circle(self.screen, self.data.colors['light'], player_center, radius=self.playerRadius + 2)
+            pygame.draw.circle(self.screen, self.data.colors['black'], player_center, radius=self.playerRadius)
                        
     def draw_sticks(self):
         
