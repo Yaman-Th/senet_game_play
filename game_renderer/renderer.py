@@ -107,7 +107,7 @@ class Renderer:
         self.draw_elements()
         self.draw_players(state)
         # self.draw_sticks()
-        # self.draw_sticks_value(state)
+        self.draw_sticks_value(state)
         self.draw_current_player(state)
         pygame.display.update()
     
