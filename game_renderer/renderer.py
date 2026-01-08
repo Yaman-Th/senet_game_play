@@ -1,5 +1,5 @@
 import pygame
-from game_state import State
+from game_state import State, PlayerColor
 from os.path import join
 
 class Data:
@@ -106,8 +106,9 @@ class Renderer:
         self.draw_grid()
         self.draw_elements()
         self.draw_players(state)
-        self.draw_sticks()
-        self.draw_sticks_value(state)
+        # self.draw_sticks()
+        # self.draw_sticks_value(state)
+        self.draw_current_player(state)
         pygame.display.update()
     
     def init_screen(self, w, h):
@@ -178,6 +179,19 @@ class Renderer:
 
             self.screen.blit(image, image_center)
     
+    def draw_current_player(self, state:State):
+        info_panel_x, info_panel_y = self.data.get_coordinate(0, 10)
+        info_panel_w, info_panel_h = self.data.get_length(1.93), self.data.get_length(1.93)
+        
+        rect = pygame.Rect(info_panel_x, info_panel_y, info_panel_w, info_panel_h).move(self.data.grid_x, self.data.grid_y)
+        
+        if state.current_player == PlayerColor.WHITE:
+            color = self.data.colors['white']
+        else:
+            color = self.data.colors['black']
+            
+        pygame.draw.rect(self.screen, color, rect, border_radius=20)
+                       
     def draw_sticks(self):
         
         info_panel_x, info_panel_y = self.data.get_coordinate(0, 10)
@@ -221,7 +235,7 @@ class Renderer:
             cell = self.get_cell_from_mouse(x, y)
             
             if cell == 31 and sticks == 0:
-                return 0
+                return -1
             else:
                 print(f"Pos:{pos}, Cell: {cell}")
                 return cell

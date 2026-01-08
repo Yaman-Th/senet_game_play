@@ -47,13 +47,13 @@ class Game:
                     
             if event.type == pygame.MOUSEBUTTONDOWN:
                 click_value = self.renderer.handle_events(event.button, self.state.sticks)
-                if click_value == None:
-                    continue
                 
-                elif click_value == 0:
+                if click_value == None:
+                    return
+                    
+                elif click_value == -1:
                     sticks = self.engine.TossStick()
                     self.state.sticks = sticks
-                
                 else:
                     self.action = click_value
                 
