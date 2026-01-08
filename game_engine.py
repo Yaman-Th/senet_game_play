@@ -89,6 +89,22 @@ class GameEngine:
             if position not in positions:
                 return position
         return None 
+    
+    def handle_special_houses(self, state):
+        if state.current_player == PlayerColor.BLACK:
+            occupied_positions = state.black_positions | state.white_positions
+            for pawn in state.black_positions:
+                if (pawn == 28 and state.sticks != 3) or (pawn == 29 and state.sticks != 2):
+                    new_position = self._first_previous(15, occupied_positions)
+                    state.black_positions.remove(pawn)
+                    state.black_positions.add(new_position)
+        else:
+            occupied_positions = state.white_positions | state.black_positions
+            for pawn in state.white_positions:
+                if (pawn == 28 and state.sticks != 3) or (pawn == 29 and state.sticks != 2):
+                    new_position = self._first_previous(15, occupied_positions)
+                    state.white_positions.remove(pawn)
+                    state.white_positions.add(new_position)
 
     def actions(self, state:State):
         """

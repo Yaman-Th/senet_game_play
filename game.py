@@ -54,6 +54,7 @@ class Game:
                 elif click_value == -1:
                     sticks = self.engine.TossStick()
                     self.state.sticks = sticks
+                    self.engine.handle_special_houses(self.state)
                 else:
                     self.action = click_value
                 
@@ -67,6 +68,7 @@ class Game:
             return
         
         self.state = new_state
+        self.action = None
         
                  
     def render(self):
