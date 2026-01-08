@@ -92,7 +92,7 @@ class ExpectiMinimaxPleyer:
         total_expected_value = 0.0
 
         for sticks_roll, probability in self.probabilities.items():
-            roll_state = State(
+            roll_state = State( 
                 white_positions = deepcopy(state.white_positions),
                 black_positions = deepcopy(state.black_positions),
                 current_player = state.current_player,
