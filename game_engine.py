@@ -63,12 +63,13 @@ class GameEngine:
         path = range(action + 1, sticks + action + 1)
         if 26 in path and action + sticks > 26:
             return False
-        if new_position == 27 :
+        if new_position in current_player_positions:
+            return False
+        elif new_position == 27:
             current_player_positions.remove(action)
             new_pos = self._first_previous(15,current_player_positions|opponent_positions)
             current_player_positions.add(new_pos)
-            return True
-        if new_position < 27:
+        elif new_position < 27:
             current_player_positions.remove(action)
             current_player_positions.add(new_position)
             if new_position in opponent_positions:
