@@ -12,7 +12,7 @@ class ExpectiMinimaxPleyer:
     def find_best_move(self, state: State) -> int:
         possible_moves = self.game_engine.actions(state)
         best_move = -1
-
+        print(f"Possible moves: {possible_moves}")
         if self.player_color == PlayerColor.BLACK:
             best_value = -math.inf  
             for move in possible_moves:
@@ -20,7 +20,7 @@ class ExpectiMinimaxPleyer:
                 if next_state is None:
                     continue
 
-                # get expected value of the stat    e after move
+                # get expected value of the stat   e after move
                 value = self.expected_value(next_state, self.max_depth)
                 if value > best_value:
                     best_value = value
@@ -56,7 +56,7 @@ class ExpectiMinimaxPleyer:
                 score -= 50
 
             elif pawn_pos == House_of_Happiness:
-                score += 20
+                score += 40
 
             elif pawn_pos in Trapped_Squares:
                 score -= 25    
@@ -132,3 +132,64 @@ class ExpectiMinimaxPleyer:
 
             return min_value
         
+def run_ai_tests():
+    """
+    This function will test the AI's decision-making in various scenarios.
+    """
+    print("--- RUNNING AI TESTS ---")
+    
+    # Let's create an AI player for the BLACK pieces
+    # We use max_depth=2 for faster testing
+    ai_player = ExpectiMinimaxPleyer(player_color=PlayerColor.BLACK, max_depth=2)
+
+    # --- Test Case 1: Obvious Winning Move ---
+    # Black has a pawn on square 29. A roll of 2 will move it to 31 (off the board).
+    # The other move (25 -> 27) leads to the House of Water (very bad).
+    # The AI MUST choose to move pawn 29.
+    # print("\n--- Test 1: Obvious Winning Move ---")
+    # state1 = State(
+    #     white_positions={1, 2, 3},
+    #     black_positions={25, 29},
+    #     current_player=PlayerColor.BLACK,
+    #     sticks=2 
+    # )
+    # best_move1 = ai_player.find_best_move(state1)
+    # print(f"Board: Black has pawns at {state1.black_positions}. Sticks roll is 2.")
+    # print(f"AI chose to move pawn: {best_move1}")
+    # print(f"Expected move: 29. -> {'PASS' if best_move1 == 29 else 'FAIL'}")
+
+    # # --- Test Case 2: Avoid Obvious Trap ---
+    # # Black can move pawn 24 to 27 (House of Water) or pawn 10 to 13.
+    # # The AI MUST avoid the trap and choose to move pawn 10.
+    # print("\n--- Test 2: Avoid Obvious Trap ---")
+    # state2 = State(
+    #     white_positions={1, 2, 3},
+    #     black_positions={10, 24},
+    #     current_player=PlayerColor.BLACK,
+    #     sticks=3
+    # )
+    # best_move2 = ai_player.find_best_move(state2)
+    # print(f"Board: Black has pawns at {state2.black_positions}. Sticks roll is 3.")
+    # print(f"AI chose to move pawn: {best_move2}")
+    # print(f"Expected move: 10. -> {'PASS' if best_move2 == 10 else 'FAIL'}")
+
+    # --- Test Case 3: Strategic Choice ---
+    # Black can move pawn 23 to 26 (House of Happiness - good bonus)
+    # or move pawn 12 to 15 (less optimal).
+    # The AI should prefer the strategic bonus and move pawn 23.
+    print("\n--- Test 3: Strategic Choice ---")
+    state3 = State(
+        white_positions={1, 2, 3},
+        black_positions={12, 23},
+        current_player=PlayerColor.BLACK,
+        sticks=3
+    )
+    best_move3 = ai_player.find_best_move(state3)
+    print(f"Board: Black has pawns at {state3.black_positions}. Sticks roll is 3.")
+    print(f"AI chose to move pawn: {best_move3}")
+    print(f"Expected move: 23. -> {'PASS' if best_move3 == 23 else 'FAIL'}")
+
+
+# To run the tests, add this line at the very end of the file
+if __name__ == "__main__":
+    run_ai_tests()
