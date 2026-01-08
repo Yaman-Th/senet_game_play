@@ -14,18 +14,32 @@ class GameEngine:
         black_positions:set = state.black_positions.copy()
         sticks:int = state.sticks
         current_player = state.current_player
-        # handle special houses
-        if current_player == PlayerColor.BLACK:
-            self._handle_special_houses(black_positions, white_positions, sticks, action)
+        if (action == 12 and sticks == 3) or (action == 13 and sticks == 2):
+            # handle pawn move
+            if current_player == PlayerColor.BLACK:
+                success = self._move_pawn(action, black_positions, white_positions, sticks)
+            else:
+                success = self._move_pawn(action, white_positions, black_positions, sticks)
+            if not success:
+                return None
+            # handle special houses
+            if current_player == PlayerColor.BLACK:
+                self._handle_special_houses(black_positions, white_positions, sticks, action)
+            else:
+                self._handle_special_houses(white_positions, black_positions, sticks, action)
         else:
-            self._handle_special_houses(white_positions, black_positions, sticks, action)
-        # handle pawn move
-        if current_player == PlayerColor.BLACK:
-            success = self._move_pawn(action, black_positions, white_positions, sticks)
-        else:
-            success = self._move_pawn(action, white_positions, black_positions, sticks)
-        if not success:
-            return None
+            # handle special houses
+            if current_player == PlayerColor.BLACK:
+                self._handle_special_houses(black_positions, white_positions, sticks, action)
+            else:
+                self._handle_special_houses(white_positions, black_positions, sticks, action)
+            # handle pawn move
+            if current_player == PlayerColor.BLACK:
+                success = self._move_pawn(action, black_positions, white_positions, sticks)
+            else:
+                success = self._move_pawn(action, white_positions, black_positions, sticks)
+            if not success:
+                return None
         # switch players
         next_player = PlayerColor.BLACK if current_player == PlayerColor.WHITE else PlayerColor.WHITE
         return State(
