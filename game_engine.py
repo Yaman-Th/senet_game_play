@@ -6,7 +6,7 @@ class GameEngine:
         """
         Transition to a new state by moving a pawn
         """
-        if action is None:
+        if action is None or state.sticks == 0:
             return None
         if not self._is_valid_action(state, action):
             return None
@@ -14,25 +14,39 @@ class GameEngine:
         black_positions:set = state.black_positions.copy()
         sticks:int = state.sticks
         current_player = state.current_player
-        # handle special houses
-        if current_player == PlayerColor.BLACK:
-            self._handle_special_houses(black_positions, white_positions, sticks, action)
+        if (action == 12 and sticks == 3) or (action == 13 and sticks == 2):
+            # handle pawn move
+            if current_player == PlayerColor.BLACK:
+                success = self._move_pawn(action, black_positions, white_positions, sticks)
+            else:
+                success = self._move_pawn(action, white_positions, black_positions, sticks)
+            if not success:
+                return None
+            # handle special houses
+            if current_player == PlayerColor.BLACK:
+                self._handle_special_houses(black_positions, white_positions, sticks, action)
+            else:
+                self._handle_special_houses(white_positions, black_positions, sticks, action)
         else:
-            self._handle_special_houses(white_positions, black_positions, sticks, action)
-        # handle pawn move
-        if current_player == PlayerColor.BLACK:
-            success = self._move_pawn(action, black_positions, white_positions, state.sticks)
-        else:
-            success = self._move_pawn(action, white_positions, black_positions, state.sticks)
-        if not success:
-            return None
+            # handle special houses
+            if current_player == PlayerColor.BLACK:
+                self._handle_special_houses(black_positions, white_positions, sticks, action)
+            else:
+                self._handle_special_houses(white_positions, black_positions, sticks, action)
+            # handle pawn move
+            if current_player == PlayerColor.BLACK:
+                success = self._move_pawn(action, black_positions, white_positions, sticks)
+            else:
+                success = self._move_pawn(action, white_positions, black_positions, sticks)
+            if not success:
+                return None
         # switch players
         next_player = PlayerColor.BLACK if current_player == PlayerColor.WHITE else PlayerColor.WHITE
         return State(
             white_positions,
             black_positions,
             next_player,
-            sticks,
+            0,
             state
         )
     
@@ -63,18 +77,19 @@ class GameEngine:
         path = range(action + 1, sticks + action + 1)
         if 26 in path and action + sticks > 26:
             return False
-        if new_position == 27 :
+        if new_position in current_player_positions:
+            return False
+        elif new_position == 27:
             current_player_positions.remove(action)
             new_pos = self._first_previous(15,current_player_positions|opponent_positions)
             current_player_positions.add(new_pos)
-            return True
-        if new_position < 27:
+        elif new_position < 27:
             current_player_positions.remove(action)
             current_player_positions.add(new_position)
             if new_position in opponent_positions:
                 opponent_positions.remove(new_position)
                 opponent_positions.add(action)
-        elif action > 26:
+        elif action >= 26:
             current_player_positions.remove(action)
             if new_position < 31:
                 current_player_positions.add(new_position)
@@ -88,6 +103,22 @@ class GameEngine:
             if position not in positions:
                 return position
         return None 
+    
+    def handle_special_houses(self, state):
+        if state.current_player == PlayerColor.BLACK:
+            occupied_positions = state.black_positions | state.white_positions
+            for pawn in state.black_positions:
+                if (pawn == 28 and state.sticks != 3) or (pawn == 29 and state.sticks != 2):
+                    new_position = self._first_previous(15, occupied_positions)
+                    state.black_positions.remove(pawn)
+                    state.black_positions.add(new_position)
+        else:
+            occupied_positions = state.white_positions | state.black_positions
+            for pawn in state.white_positions:
+                if (pawn == 28 and state.sticks != 3) or (pawn == 29 and state.sticks != 2):
+                    new_position = self._first_previous(15, occupied_positions)
+                    state.white_positions.remove(pawn)
+                    state.white_positions.add(new_position)
 
     def actions(self, state:State):
         """

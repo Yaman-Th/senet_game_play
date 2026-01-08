@@ -30,7 +30,7 @@ class ExpectiMinimaxPleyer:
                 if value > best_value:
                     best_value = value
                     best_move = move
-            return best_move
+            return best_move,best_value
                 
         else:
             best_value = math.inf
@@ -140,7 +140,27 @@ class ExpectiMinimaxPleyer:
                 min_value = min(min_value, value)
 
             return min_value
-        
+     
+    def analysis_inf(self,state:State):
+        self.visited_state=0
+        best_move,score =self.find_best_move(state)
+        if best_move==-1:
+            return None
+        next_state=self.game_engine.transition_model(state,best_move)
+        moved_set = (
+        next_state.black_positions - state.black_positions
+         if self.player_color == PlayerColor.BLACK
+         else next_state.white_positions - state.white_positions
+         )
+        destenation=moved_set.pop() if moved_set else None
+        return{
+            "pawn":best_move,
+            "score":score,
+            "visited":self.visited_state,
+            "whereToGo":destenation
+        }
+
+
 def run_ai_tests():
     """
     This function will test the AI's decision-making in various scenarios.
