@@ -67,6 +67,7 @@ class Game:
             return
         
         self.state = new_state
+        self.action = None
         
                  
     def render(self):
