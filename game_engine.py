@@ -6,7 +6,7 @@ class GameEngine:
         """
         Transition to a new state by moving a pawn
         """
-        if action is None:
+        if action is None or state.sticks == 0:
             return None
         if not self._is_valid_action(state, action):
             return None
@@ -21,9 +21,9 @@ class GameEngine:
             self._handle_special_houses(white_positions, black_positions, sticks, action)
         # handle pawn move
         if current_player == PlayerColor.BLACK:
-            success = self._move_pawn(action, black_positions, white_positions, state.sticks)
+            success = self._move_pawn(action, black_positions, white_positions, sticks)
         else:
-            success = self._move_pawn(action, white_positions, black_positions, state.sticks)
+            success = self._move_pawn(action, white_positions, black_positions, sticks)
         if not success:
             return None
         # switch players
@@ -32,7 +32,7 @@ class GameEngine:
             white_positions,
             black_positions,
             next_player,
-            sticks,
+            0,
             state
         )
     
@@ -74,7 +74,7 @@ class GameEngine:
             if new_position in opponent_positions:
                 opponent_positions.remove(new_position)
                 opponent_positions.add(action)
-        elif action > 26:
+        elif action >= 26:
             current_player_positions.remove(action)
             if new_position < 31:
                 current_player_positions.add(new_position)
