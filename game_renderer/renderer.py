@@ -1,182 +1,231 @@
 import pygame
-from pygame.math import Vector2
-
 from game_state import State
+from os.path import join
 
-CELL_SIZE = 100
-MARGIN = 8
-
-POSITIONS = {
-    # Position 1 to 10 (row 0)
-    0: (2, 10), 1: (0, 0), 2: (0, 1), 3: (0, 2), 4: (0, 3), 5: (0, 4), 6: (0, 5), 7: (0, 6), 8: (0, 7), 9: (0, 8), 10: (0, 9),
-    # Position 11 to 20 (row 1)
-    11: (1, 9), 12: (1, 8), 13: (1, 7), 14: (1, 6), 15: (1, 5), 16: (1, 4), 17: (1, 3), 18: (1, 2), 19: (1, 1), 20: (1, 0),
-    # Position 21 to 30 (row 2)
-    21: (2, 0), 22: (2, 1), 23: (2, 2), 24: (2, 3), 25: (2, 4), 26: (2, 5), 27: (2, 6), 28: (2, 7), 29: (2, 8), 30: (2, 9), 31: (2, 11)
-}
-
-REVERSE_POSITIONS = {
-    (2, 10): 0, (0, 0): 1, (0, 1): 2, (0, 2): 3, (0, 3): 4, (0, 4): 5, (0, 5): 6, (0, 6): 7, (0, 7): 8, (0, 8): 9, (0, 9): 10,
-    (1, 9): 11, (1, 8): 12, (1, 7): 13, (1, 6): 14, (1, 5): 15, (1, 4): 16, (1, 3): 17, (1, 2): 18, (1, 1): 19, (1, 0): 20,
-    (2, 0): 21, (2, 1): 22, (2, 2): 23, (2, 3): 24, (2, 4): 25, (2, 5): 26, (2, 6): 27, (2, 7): 28, (2, 8): 29, (2, 9): 30, (2, 11): 31
-}
-
-ELEMENTS = {15: (1, 5), 26: (2, 5), 27: (2, 6), 28: (2, 7), 29: (2, 8), 30: (2, 9), 0: (2, 10)}
-COLORS = {
-    'light':(221, 160, 98),
-    'dark':(240, 228, 216),
-    'white': (255,252,242),
-    'black': (27,18,4),
-    'brown':(116,71,0),
-    'green':(26,178,19)
-}
-IMAGES = {
-    15 : pygame.image.load("images/start_1.png"),   # start
-    26 : pygame.image.load("images/stop.png"),      # stop
-    27 : pygame.image.load("images/return.png"),    # return to start
-    28 : pygame.image.load("images/three.png"),     # three steps
-    29 : pygame.image.load("images/two.png"),       # two steps
-    30 : pygame.image.load("images/go.png"),        # any step to go
-     0 : pygame.image.load("images/target.png"),    # final goal
-    "sticks": pygame.image.load("images/stick.png"),    # 4 sticks
-}
-
-def get_length(cell, margin,repeat):
-        return (cell + margin)* repeat
+class Data:
+    def __init__(self, cell, margin):
+        self.cell = cell
+        self.margin = margin
+        self.module = cell + margin
+        self.grid_c, self.grid_r = 1, 2
+        self.grid_x, self.grid_y = self.get_coordinate(self.grid_r, self.grid_c)
+        self.elements = {15: (1, 5), 26: (2, 5), 27: (2, 6), 28: (2, 7), 29: (2, 8), 30: (2, 9), 0: (2, 10)}
+        self.colors = {
+            'light': (221, 160, 98),
+            'dark' : (240, 228, 216),
+            'white': (255,252,242),
+            'black': (27,18,4),
+            'brown': (116,71,0),
+            'green': (26,178,19)
+        }
+        self.positions = {
+            0: (2, 10), 1: (0, 0), 2: (0, 1), 3: (0, 2), 4: (0, 3), 5: (0, 4), 6: (0, 5), 7: (0, 6), 8: (0, 7), 9: (0, 8), 10: (0, 9),
+            11: (1, 9), 12: (1, 8), 13: (1, 7), 14: (1, 6), 15: (1, 5), 16: (1, 4), 17: (1, 3), 18: (1, 2), 19: (1, 1), 20: (1, 0),
+            21: (2, 0), 22: (2, 1), 23: (2, 2), 24: (2, 3), 25: (2, 4), 26: (2, 5), 27: (2, 6), 28: (2, 7), 29: (2, 8), 30: (2, 9), 31: (2, 11)
+            }
+        self.r_posistions = {
+            (2, 10): 0, (0, 0): 1, (0, 1): 2, (0, 2): 3, (0, 3): 4, (0, 4): 5, (0, 5): 6, (0, 6): 7, (0, 7): 8, (0, 8): 9, (0, 9): 10,
+            (1, 9): 11, (1, 8): 12, (1, 7): 13, (1, 6): 14, (1, 5): 15, (1, 4): 16, (1, 3): 17, (1, 2): 18, (1, 1): 19, (1, 0): 20,
+            (2, 0): 21, (2, 1): 22, (2, 2): 23, (2, 3): 24, (2, 4): 25, (2, 5): 26, (2, 6): 27, (2, 7): 28, (2, 8): 29, (2, 9): 30, (2, 11): 31
+        }
         
+    def get_length(self, repeat):
+        """
+        to convert from squares to screen pixels
+        :param repeat: number of squares
+        """
+        return self.module * repeat
+    
+    def get_length_cell(self, repeat):
+        """
+        to convert from squares to screen pixels
+        :param repeat: number of squares
+        """
+        return self.cell * repeat
+    
+    def get_coordinate(self, r, c):
+        """
+        convert the index (row, col) to coordinates (x, y)
+        :param r: row number
+        :param c: col number
+        """
+        x, y = c * self.module , r * self.module
+        return (x, y)
+    
+    def get_row_and_col(self, x, y):
+        """
+        convert coordinates (x, y) to index (row, col)
+        :param x: x value
+        :param y: y value
+        """
+        c, r = (x // self.module) - self.grid_c, (y // self.module) - self.grid_r
+        return (c, r)
+    
+    def get_center(self, x, y, cell_w, cell_h):
+        return (x + (cell_w // 2), y + (cell_h // 2))
+    
+    def move(self, coords:tuple):
+        return coords[0] + self.grid_x, coords[1] + self.grid_y
+    
+    def set_image_size(self, f):
+        return (self.cell * f, self.cell * f)
+    
 class Renderer:
-    screen_w = get_length(CELL_SIZE, MARGIN, 14)
-    screen_h = get_length(CELL_SIZE, MARGIN, 6)
-    
-    grid_x, grid_y = (CELL_SIZE + MARGIN) + MARGIN, (CELL_SIZE + MARGIN) * 2 + MARGIN
-    
-    def _get_coordinate(self, r, c):
-        x, y = c * (CELL_SIZE + MARGIN) + self.grid_x, r * (CELL_SIZE + MARGIN) + self.grid_y
-        return x, y
-    
-    def _get_row_and_col(self, x, y):
-        c, r = (x // (CELL_SIZE + MARGIN)) - 1 , (y // (CELL_SIZE + MARGIN)) - 2
-        return c, r
-
     def __init__(self):
-        self.screen = pygame.display.set_mode((self.screen_w, self.screen_h))
+        # all static data
+        self.data = Data(90, 9)
+        
+        # screen data
+        self.screen_w = self.data.get_length(14)
+        self.screen_h = self.data.get_length(6)
+        self.screen = self.init_screen(self.screen_w, self.screen_h)
+        
         self.font = pygame.font.Font(None, 36)
         self.small_font = pygame.font.Font(None, 28)
-        self.sticks_font = pygame.font.Font(None, int(CELL_SIZE // 1.5)) 
-        self.playerRadius = int(CELL_SIZE / 4)
-        self.hover_color = COLORS['white']
-    
-    def _center_coordinate(self, x, y, cell_w, cell_h):
-        return Vector2(x + (cell_w // 2), y + (cell_h // 2))
+        self.sticks_font = pygame.font.Font(None, int(self.data.cell // 1.5)) 
+        self.playerRadius = int(self.data.cell // 4)
+        self.IMAGES = {
+            15      : pygame.image.load(join('images', 'start_1.png')).convert_alpha(),   # start
+            26      : pygame.image.load(join('images', 'stop.png'   )).convert_alpha(),   # stop
+            27      : pygame.image.load(join('images', 'return.png' )).convert_alpha(),   # return to start
+            28      : pygame.image.load(join('images', 'three.png'  )).convert_alpha(),   # three steps
+            29      : pygame.image.load(join('images', 'two.png'    )).convert_alpha(),   # two steps
+            30      : pygame.image.load(join('images', 'go.png'     )).convert_alpha(),   # any step to go
+             0      : pygame.image.load(join('images', 'target.png' )).convert_alpha(),   # final goal
+            "sticks": pygame.image.load(join('images', 'stick.png'  )).convert_alpha(),   # 4 sticks 
+            }
     
     def render(self, state, start_time):
-        self.screen.fill((235,202,148))
+        """
+        rendering all screen elements
+        
+        :param state: state that rendered
+        :param start_time: using to rendering elapsed time
+        """
+        self.screen.fill(self.data.colors['brown'])
         self.draw_grid()
         self.draw_elements()
         self.draw_players(state)
-        self.draw_info_panel()
         self.draw_sticks()
         self.draw_sticks_value(state)
         pygame.display.update()
     
-    background_w, background_h = get_length(CELL_SIZE, MARGIN, 12) + MARGIN, get_length(CELL_SIZE, MARGIN, 3) + MARGIN
-    background_x, background_y = (CELL_SIZE + MARGIN), (CELL_SIZE + MARGIN) * 2
+    def init_screen(self, w, h):
+        """
+        initilize the screen 
+        
+        :param w: screen width
+        :param h: screen height
+        """
+        screen = pygame.display.set_mode((w, h))
+        pygame.display.set_caption("Senet Game")
+        
+        icon = pygame.image.load(join('images', 'logo.png')).convert_alpha()
+        pygame.display.set_icon(icon)
+        
+        return screen
+    
     def draw_grid(self):
-        # draw background
-        bg_rect = pygame.Rect(self.background_x, self.background_y, self.background_w, self.background_h)
-        pygame.draw.rect(self.screen, COLORS['brown'], bg_rect, border_radius=20)
         
         # Change color if mouse is hovering
         mouse_pos = pygame.mouse.get_pos()
-        # current_color = self.hover_color if self.rect.collidepoint(mouse_pos) else self.color
-        
+                
         # draw cells
-        for key, value in POSITIONS.items():
+        for key, value in self.data.positions.items():
             r, c = value[0], value[1]
-            x, y = self._get_coordinate(r, c)
+            x, y = self.data.get_coordinate(r, c)
             
             if (r + c) % 2 == 0:
-                color = COLORS['light']
+                color = self.data.colors['light']
             else:
-                color = COLORS['dark']
+                color = self.data.colors['dark']
                 
-            rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
+            rect = pygame.Rect(x, y, self.data.cell, self.data.cell).move(self.data.grid_x, self.data.grid_y)
+            
             pygame.draw.rect(self.screen, color, rect, border_radius=20)
             
             if rect.collidepoint(mouse_pos):
                 # Draw only the outline (border)
                 # The 3rd argument (LINE_WIDTH) makes it an outline instead of a solid fill
-                pygame.draw.rect(self.screen, COLORS['green'], rect, 3, border_radius=20)
+                pygame.draw.rect(self.screen, self.data.colors['green'], rect, 3, border_radius=20)
                 
-
-    info_panel_x, info_panel_y = (CELL_SIZE + MARGIN) * 11 + MARGIN, (CELL_SIZE + MARGIN) * 2 + MARGIN
-    info_panel_w, info_panel_h = get_length(CELL_SIZE, MARGIN, 2) - MARGIN, get_length(CELL_SIZE, MARGIN, 2) - MARGIN
-    def draw_info_panel(self):
-        rect = pygame.Rect(self.info_panel_x, self.info_panel_y, self.info_panel_w, self.info_panel_h)
-        pygame.draw.rect(self.screen, COLORS['dark'], rect, border_radius=20)
-    
     def draw_players(self, state):
         
         for pos in state.white_positions :            
-            r, c = POSITIONS[pos][0], POSITIONS[pos][1]
-            x, y = self._get_coordinate(r, c)
+            r, c = self.data.positions[pos][0], self.data.positions[pos][1]
+            x, y = self.data.move(self.data.get_coordinate(r, c))
             
-            player_center =  self._center_coordinate(x, y, CELL_SIZE, CELL_SIZE)
+            player_center =  self.data.get_center(x, y, self.data.cell, self.data.cell)
                        
-            pygame.draw.circle(self.screen, COLORS['white'], player_center, self.playerRadius)
+            pygame.draw.circle(self.screen, self.data.colors['white'], player_center, self.playerRadius)
         
         for pos in state.black_positions :            
-            r, c = POSITIONS[pos][0], POSITIONS[pos][1]
-            x, y = self._get_coordinate(r, c)
+            r, c = self.data.positions[pos][0], self.data.positions[pos][1]
+            x, y = self.data.move(self.data.get_coordinate(r, c))
             
-            player_center = self._center_coordinate(x, y, CELL_SIZE, CELL_SIZE)
+            player_center = self.data.get_center(x, y, self.data.cell, self.data.cell)
                         
-            pygame.draw.circle(self.screen, COLORS['black'], player_center, self.playerRadius)
+            pygame.draw.circle(self.screen, self.data.colors['black'], player_center, self.playerRadius)
     
     def draw_elements(self):
-        for key, value in ELEMENTS.items():
+        for key, value in self.data.elements.items():
             r, c = value[0], value[1]
-            x, y = self._get_coordinate(r, c)
-            w, h = 80, 80
+            x, y = self.data.move(self.data.get_coordinate(r, c))
+            w, h = self.data.set_image_size(0.8)
             
-            image = pygame.transform.scale(IMAGES[key], (w, h))
-            image_center = self._center_coordinate(x, y, CELL_SIZE - w, CELL_SIZE - h)
+            image = pygame.transform.scale(self.IMAGES[key], (w, h))
+            image_center = self.data.get_center(x, y, self.data.cell - w, self.data.cell - h)
 
             self.screen.blit(image, image_center)
     
-    sticks_x, sticks_y, = (CELL_SIZE + MARGIN) * 11 + MARGIN, (CELL_SIZE + MARGIN) * 2 + MARGIN
-    sticks_w, sticks_h  = get_length(CELL_SIZE, MARGIN, 1.5) , get_length(CELL_SIZE, MARGIN, 1.7)
-    def draw_sticks(self):     
+    def draw_sticks(self):
+        
+        info_panel_x, info_panel_y = self.data.get_coordinate(0, 10)
+        info_panel_w, info_panel_h = self.data.get_length(1.93), self.data.get_length(1.93)
+        
+        rect = pygame.Rect(info_panel_x, info_panel_y, info_panel_w, info_panel_h).move(self.data.grid_x, self.data.grid_y)
+        pygame.draw.rect(self.screen, self.data.colors['dark'], rect, border_radius=20)
+        
+        sticks_x, sticks_y, = self.data.move(self.data.get_coordinate(0, 10))
+        sticks_w, sticks_h  = self.data.get_length(1.5) , self.data.get_length(1.7)
            
-        image = pygame.transform.scale(IMAGES["sticks"], (self.sticks_w , self.sticks_h))
-        image_center = self._center_coordinate(self.sticks_x, self.sticks_y, self.info_panel_w - self.sticks_w, self.info_panel_h - self.sticks_h)
+        image = pygame.transform.scale(self.IMAGES["sticks"], (sticks_w , sticks_h))
+        image_center = self.data.get_center(sticks_x, sticks_y, info_panel_w - sticks_w, info_panel_h - sticks_h)
         
         self.screen.blit(image, image_center)
     
     def draw_sticks_value(self, state:State):
-        
         text = str(state.sticks)
-        text_surface = self.sticks_font.render(text, True, COLORS['brown'])
+        text_surface = self.sticks_font.render(text, True, self.data.colors['brown'])
         
-        r, c = POSITIONS[31][0], POSITIONS[31][1]
-        x, y = self._get_coordinate(r, c)
-        cell_rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
+        r, c = self.data.positions[31][0], self.data.positions[31][1]
+        x, y = self.data.move(self.data.get_coordinate(r, c))
+        
+        cell_rect = pygame.Rect(x, y, self.data.cell, self.data.cell)
         text_rect = text_surface.get_rect(center=cell_rect.center)
         
         self.screen.blit(text_surface, text_rect)
-        
-        
-    def is_clicked(self, event):
-        if self.rect.collidepoint(event.pos):
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: # 1 is left click
-                return True
-        return False
     
     def get_cell_from_mouse(self, x, y):
-
-        col, row = self._get_row_and_col(x, y)
+        col, row = self.data.get_row_and_col(x, y)
         
-        if (row, col) in REVERSE_POSITIONS.keys():
-            return REVERSE_POSITIONS[(row, col)]
+        if (row, col) in self.data.r_posistions.keys():
+            return self.data.r_posistions[(row, col)]
         else:
             return None
+    
+    def handle_events(self, event, sticks):
+        if event == 1:
+            pos = pygame.mouse.get_pos()
+            x, y = pos[0], pos[1]
+            cell = self.get_cell_from_mouse(x, y)
+            
+            if cell == 31 and sticks == 0:
+                return 0
+            else:
+                print(f"Pos:{pos}, Cell: {cell}")
+                return cell
+
+        
+    
+    

@@ -2,7 +2,9 @@ import pygame
 from enum import Enum, auto
 from game_state import State
 from game_renderer.renderer import Renderer
+from game_engine import GameEngine
 from copy import deepcopy
+
 from pygame.math import Vector2
 import time
 
@@ -18,16 +20,13 @@ class Game:
     def __init__(self, mode:Mode):
         pygame.init()
         self.inital_state = State()
-        self.state = deepcopy(self.inital_state)
-        
-        pygame.display.set_caption("Senet Game")
-        
-        icon = pygame.image.load("images/logo.png")
-        pygame.display.set_icon(icon)
-        
         self.renderer = Renderer()
+        self.engine = GameEngine()
+        
+        self.state = deepcopy(self.inital_state)
+        self.action = None
+    
         self.start_time =  time.time()
-        self.terminal_mode = False
         
         # Loop properties
         self.clock = pygame.time.Clock()
@@ -38,14 +37,6 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
 
-            if self.terminal_mode:
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_r:
-                        self.restart()
-                    elif event.key == pygame.K_ESCAPE:
-                        self.running = False
-                return
-
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
@@ -53,19 +44,31 @@ class Game:
                     self.undo()
                 elif event.key == pygame.K_r:
                     self.restart()
+                    
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1: # Left click
-                    pos = pygame.mouse.get_pos()
-                    x, y = pos[0], pos[1]
-                    cell = self.renderer.get_cell_from_mouse(x, y)
-                    print(f"Pos:{pos}, Cell: {cell}")            
-    
+                click_value = self.renderer.handle_events(event.button, self.state.sticks)
+                if click_value == None:
+                    continue
+                
+                elif click_value == 0:
+                    sticks = self.engine.TossStick()
+                    self.state.sticks = sticks
+                
+                else:
+                    self.action = click_value
+                
+                      
     def restart(self):
-        pass
+        self.state = self.inital_state
     
     def update(self):
-        pass
-    
+        new_state = self.engine.transition_model(self.state, self.action)
+        if new_state is None:
+            return
+        
+        self.state = new_state
+        
+                 
     def render(self):
         self.renderer.render(self.state, self.start_time)
     
