@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import math
 import pytest
 
-from algorithms.expectiminimax import ExpectiMinimaxPleyer
+from algorithms.expectiminimax import ExpectiMinimaxPlayer
 from game_engine import GameEngine
 from game_state import State, PlayerColor
 
@@ -17,7 +17,7 @@ from game_state import State, PlayerColor
 
 @pytest.fixture
 def ai_black():
-    return ExpectiMinimaxPleyer(PlayerColor.BLACK, max_depth=2)
+    return ExpectiMinimaxPlayer(PlayerColor.BLACK, max_depth=2)
 
 
 @pytest.fixture
@@ -103,8 +103,8 @@ def test_choose_winning_move(ai_black):
 # --------------------------------------------------
 
 def test_deeper_search_runs_correctly():
-    ai_shallow = ExpectiMinimaxPleyer(PlayerColor.BLACK, 1)
-    ai_deep = ExpectiMinimaxPleyer(PlayerColor.BLACK, 3)
+    ai_shallow = ExpectiMinimaxPlayer(PlayerColor.BLACK, 1)
+    ai_deep = ExpectiMinimaxPlayer(PlayerColor.BLACK, 3)
 
     state = State({14}, {22}, PlayerColor.BLACK, 3)
 
