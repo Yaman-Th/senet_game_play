@@ -15,35 +15,32 @@ class ExpectiMinimaxPlayer:
         self.visited_states=0
         possible_moves = self.game_engine.actions(state)
         best_move = -1
-        print(f"Possible moves: {possible_moves}")
-        if self.player_color == PlayerColor.BLACK:
+        # print(f"Possible moves: {possible_moves}")
+        if state.current_player == self.player_color:
             best_value = -math.inf  
             for move in possible_moves:
-                print("-"*100)
-                print(f"Evaluating move: {move}")
+                # print("-"*100)
+                # print(f"Evaluating move: {move}")
                 next_state = self.game_engine.transition_model(state, move)
                 if next_state is None:
                     continue
-
-                # get expected value of the stat   e after move
+                # get expected value of the stat  e after move
                 value = self.expected_value(next_state, self.max_depth)
                 if value > best_value:
                     best_value = value
                     best_move = move
             return best_move,best_value
-                
         else:
             best_value = math.inf
             for move in possible_moves:
                 next_state = self.game_engine.transition_model(state, move)
                 if next_state is None:
                     continue
-
                 value = self.expected_value(next_state, self.max_depth)
                 if value< best_value:
                     best_value= value
                     best_move = move
-            return best_move
+            return best_move,best_value
         
 
     def _is_game_over(self, state: State) -> bool:
@@ -79,14 +76,15 @@ class ExpectiMinimaxPlayer:
     def evaluate(self, state: State) -> float:
         if self._is_game_over(state):
             if not state.black_positions:
-                return math.inf   # Black wins
-            else:
-                return -math.inf  # white wins
-
+                return math.inf if self.player_color == PlayerColor.BLACK else -math.inf
+            if not state.white_positions:
+                return math.inf if self.player_color == PlayerColor.WHITE else -math.inf
         black_score = self._get_player_score(state.black_positions)
         white_score = self._get_player_score(state.white_positions)
-
-        return black_score - white_score
+        if self.player_color == PlayerColor.BLACK:
+            return black_score - white_score
+        else:
+            return white_score - black_score
     
     def expected_value(self,state :State, depth :int) ->float:
         total_expected_value = 0.0
@@ -117,7 +115,7 @@ class ExpectiMinimaxPlayer:
             skipped_state = State(state.white_positions, state.black_positions, next_Player, 0, state)
             return self.expected_value(skipped_state, depth-1)
         
-        # max player's turn(Black player)
+        # max player's turn
         if state.current_player == self.player_color:
             max_value = -math.inf
             for move in possible_moves:
@@ -129,7 +127,7 @@ class ExpectiMinimaxPlayer:
 
             return max_value
 
-        #min player's turn(White player)
+        #min player's turn
         else:
             min_value = math.inf
             for move in possible_moves:
@@ -142,7 +140,7 @@ class ExpectiMinimaxPlayer:
             return min_value
      
     def analysis_inf(self,state:State):
-        self.visited_state=0
+        self.visited_states=0
         best_move,score =self.find_best_move(state)
         if best_move==-1:
             return None
@@ -156,7 +154,7 @@ class ExpectiMinimaxPlayer:
         return{
             "pawn":best_move,
             "score":score,
-            "visited":self.visited_state,
+            "visited":self.visited_states,
             "whereToGo":destenation
         }
 

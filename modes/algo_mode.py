@@ -10,7 +10,8 @@ class algorithmMode:
     """Class that contain game loop (algorithm vs player)"""
     def __init__(self):
         pygame.init()
-        self.algo = ExpectiMinimaxPlayer(PlayerColor.BLACK)
+        self.algo_black = ExpectiMinimaxPlayer(PlayerColor.BLACK)
+        self.algo_white = ExpectiMinimaxPlayer(PlayerColor.WHITE)
         self.renderer = Renderer()
         self.engine = GameEngine()
         self.inital_state = State()
@@ -77,7 +78,7 @@ class algorithmMode:
             sticks = self.engine.TossStick()
             self.state.sticks = sticks
             self.engine.handle_special_houses(self.state)
-            best_action = self.algo.find_best_move(self.state)
+            best_action = self.algo_black.find_best_move(self.state)
             self.action = best_action[0]
             new_state = self.engine.transition_model(self.state, self.action)
             if new_state is None:
@@ -86,13 +87,16 @@ class algorithmMode:
             self.action = None
         # Player Turn (White)
         elif self.state.current_player == PlayerColor.WHITE:
-            if self.action is not None:
-                new_state = self.engine.transition_model(self.state, self.action)
-                if new_state is None:
-                    self.action = None
-                    return
-                self.state = new_state
-                self.action = None
+            sticks = self.engine.TossStick()
+            self.state.sticks = sticks
+            self.engine.handle_special_houses(self.state)
+            best_action = self.algo_white.find_best_move(self.state)
+            self.action = best_action[0]
+            new_state = self.engine.transition_model(self.state, self.action)
+            if new_state is None:
+                return
+            self.state = new_state
+            self.action = None
                  
     def render(self):
         self.renderer.render(self.state, self.start_time, self.engine.actions(self.state))
