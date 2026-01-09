@@ -3,7 +3,7 @@ from game_state import State, PlayerColor
 from game_engine import GameEngine
 from copy import deepcopy
 
-class ExpectiMinimaxPleyer:
+class ExpectiMinimaxPlayer:
     def __init__(self, player_color: PlayerColor, max_depth: int = 3):
         self.player_color = player_color
         self.max_depth = max_depth
@@ -11,7 +11,7 @@ class ExpectiMinimaxPleyer:
         self.probabilities = {1: 4/16, 2: 6/16, 3: 4/16, 4: 1/16, 5: 1/16}
         self.visited_states=0
         
-    def find_best_move(self, state: State) -> int:
+    def find_best_move(self, state:State) -> int:
         self.visited_states=0
         possible_moves = self.game_engine.actions(state)
         best_move = -1
@@ -169,7 +169,7 @@ def run_ai_tests():
     
     # Let's create an AI player for the BLACK pieces
     # We use max_depth=2 for faster testing
-    ai_player = ExpectiMinimaxPleyer(player_color=PlayerColor.BLACK, max_depth=2)
+    ai_player = ExpectiMinimaxPlayer(player_color=PlayerColor.BLACK, max_depth=2)
 
     # --- Test Case 1: Obvious Winning Move ---
     # Black has a pawn on square 29. A roll of 2 will move it to 31 (off the board).

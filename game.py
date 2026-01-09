@@ -1,6 +1,7 @@
 from enum import Enum, auto
-from player_mode import PLayerMode
-from algo_player_mode import algorithmPlayerMode
+from modes.player_mode import PLayerMode
+from modes.algo_mode import algorithmMode
+from modes.algo_player_mode import algorithmPlayerMode
 
 class Mode(Enum):
     PLAYER_MODE = auto()
@@ -23,5 +24,5 @@ class Game:
         elif self.mode == Mode.ALGORITHM_AND_PLAYER_MODE:
             game_loop = algorithmPlayerMode()
         elif self.mode == Mode.ALGORITHM_MODE:
-            game_loop = PLayerMode()
+            game_loop = algorithmMode()
         game_loop.run()
