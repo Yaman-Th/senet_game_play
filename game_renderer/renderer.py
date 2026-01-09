@@ -76,7 +76,6 @@ class Renderer:
     def __init__(self):
         # all static data
         self.data = Data(90, 9)
-        
         # screen data
         self.screen_w = self.data.get_length(14)
         self.screen_h = self.data.get_length(6)
@@ -106,14 +105,14 @@ class Renderer:
         """
         self.screen.fill(self.data.colors['brown'])
         self.draw_grid()
-        self.draw_elements()
-        self.draw_actions(actions)
-        self.draw_players(state)
         # self.draw_sticks()
         self.draw_sticks_value(state)
         self.draw_current_player(state)
         self.draw_score(state)
         self.draw_skip_button()
+        self.draw_actions(actions, state)
+        self.draw_elements()
+        self.draw_players(state)
         pygame.display.update()
     
     def init_screen(self, w, h):
@@ -148,11 +147,9 @@ class Renderer:
             
             pygame.draw.rect(self.screen, color, rect, border_radius=20)
             
-            if rect.collidepoint(self.mouse_pos):
-                # Draw only the outline (border)
-                # The 3rd argument (LINE_WIDTH) makes it an outline instead of a solid fill
-                pygame.draw.rect(self.screen, self.data.colors['green'], rect, 3, border_radius=20)
-                
+            # if rect.collidepoint(self.mouse_pos):
+            #     pygame.draw.rect(self.screen, self.data.colors['orange'], rect, 5, border_radius=20)
+                  
     def draw_players(self, state):
         
         for pos in state.white_positions :            
@@ -237,9 +234,9 @@ class Renderer:
         rect = pygame.Rect(x, y, self.data.cell, self.data.cell)
         
         if rect.collidepoint(self.mouse_pos):
-            color = self.data.colors['blue']
+            color = self.data.colors['orange']
             text_color = self.data.colors['white']
-            text = "Toss !"
+            text = "TOSS"
         else:
             color = self.data.colors['light']
             text_color = self.data.colors['brown']
@@ -253,7 +250,7 @@ class Renderer:
         pygame.draw.rect(self.screen, color, rect, border_radius=20)
         self.screen.blit(text_surface, text_rect)
     
-    def get_cell_from_mouse(self, x, y):
+    def get_cell_number(self, x, y):
         col, row = self.data.get_row_and_col(x, y)
         
         if (row, col) in self.data.r_posistions.keys():
@@ -261,15 +258,28 @@ class Renderer:
         else:
             return None
     
-    def draw_actions(self, actions):
-        # draw cells
-        for action in actions:
-            r, c = self.data.positions[action]
+    def draw_actions(self, actions, state:State):
+        if not actions and state.sticks != 0:
+            r, c = self.data.positions[0]
             x, y = self.data.get_coordinate(r, c)
             
             color = self.data.colors['green']
             rect = pygame.Rect(x, y, self.data.cell, self.data.cell).move(self.data.grid_x, self.data.grid_y)
-            pygame.draw.rect(self.screen, color, rect, border_radius=20)
+            pygame.draw.rect(self.screen, color, rect, 5,border_radius=20)
+        else:
+            for action in actions:
+                r, c = self.data.positions[action]
+                x, y = self.data.get_coordinate(r, c)
+                
+                color = self.data.colors['green']
+                rect = pygame.Rect(x, y, self.data.cell, self.data.cell).move(self.data.grid_x, self.data.grid_y)
+                pygame.draw.rect(self.screen, color, rect, 5,border_radius=20)
+            
+                if rect.collidepoint(self.mouse_pos) and (action + state.sticks <= 31):
+                    r, c = self.data.positions[action + state.sticks]
+                    x, y = self.data.get_coordinate(r, c)
+                    new_rect = pygame.Rect(x, y, self.data.cell, self.data.cell).move(self.data.grid_x, self.data.grid_y)
+                    pygame.draw.rect(self.screen, self.data.colors['green'], new_rect, 5,border_radius=20)
              
     def draw_skip_button(self):
         r, c = self.data.positions[0]
@@ -298,7 +308,7 @@ class Renderer:
         if event == 1:
             pos = pygame.mouse.get_pos()
             x, y = pos[0], pos[1]
-            cell = self.get_cell_from_mouse(x, y)
+            cell = self.get_cell_number(x, y)
             
             if cell == 0 and not actions and sticks != 0:
                 self.skip_turn(state)
@@ -307,6 +317,9 @@ class Renderer:
             else:
                 print(f"Pos:{pos}, Cell: {cell}")
                 return cell
+    
+        
+            
 
         
     
