@@ -45,6 +45,14 @@ class PLayerMode:
                       
     def restart(self):
         self.state = self.inital_state
+        self.state.sticks = 0
+        self.action = None
+
+    def undo(self):
+        if self.state.parent is not None:
+            self.state = self.state.parent
+            self.state.sticks = 0
+            self.action = None
     
     def update(self):
         new_state = self.engine.transition_model(self.state, self.action)

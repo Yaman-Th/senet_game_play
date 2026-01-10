@@ -317,10 +317,3 @@ class Renderer:
             else:
                 print(f"Pos:{pos}, Cell: {cell}")
                 return cell
-    
-        
-            
-
-        
-    
-    

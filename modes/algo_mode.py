@@ -7,7 +7,7 @@ from game_renderer.renderer import Renderer
 from algorithms.expectiminimax import ExpectiMinimaxPlayer
 
 class algorithmMode:
-    """Class that contain game loop (algorithm vs player)"""
+    """Class that contain game loop (algorithm vs algorithm)"""
     def __init__(self):
         pygame.init()
         self.algo_black = ExpectiMinimaxPlayer(PlayerColor.BLACK)
@@ -35,42 +35,19 @@ class algorithmMode:
                     self.undo()
                 elif event.key == pygame.K_r:
                     self.restart()
-                    
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                # player turn (listen to mouse click)
-                if self.state.current_player == PlayerColor.WHITE:
-                    click_value = self.renderer.handle_events(
-                        event.button,
-                        self.state.sticks,
-                        self.state,
-                        self.engine.actions(self.state)
-                    )
-                    if click_value is None:
-                        continue
-                    elif click_value == -1:
-                        if not self.waiting_for_sticks:
-                            sticks = self.engine.TossStick()
-                            self.state.sticks = sticks
-                            self.engine.handle_special_houses(self.state)
-                            self.waiting_for_sticks = True
-                            valid_actions = self.engine.actions(self.state)
-                            if not valid_actions:
-                                self.state.current_player = PlayerColor.BLACK
-                                self.state.sticks = 0
-                                self.waiting_for_sticks = False
-                            else:
-                                self.waiting_for_sticks = True
-                    else:
-                        if self.waiting_for_sticks and self.state.sticks:
-                            self.action = click_value
-                            self.waiting_for_sticks = False
-                # AI turn (ignore mouse click)
-                else:
-                    pass
                       
     def restart(self):
         self.state = self.inital_state
+        self.state.sticks = 0
+        self.action = None
         self.waiting_for_sticks = False
+
+    def undo(self):
+        if self.state.parent is not None:
+            self.state = self.state.parent
+            self.state.sticks = 0
+            self.action = None
+            self.waiting_for_sticks = False
     
     def update(self):
         # AI turn (Black)
@@ -85,7 +62,7 @@ class algorithmMode:
                 return
             self.state = new_state
             self.action = None
-        # Player Turn (White)
+        # AI Turn (White)
         elif self.state.current_player == PlayerColor.WHITE:
             sticks = self.engine.TossStick()
             self.state.sticks = sticks
