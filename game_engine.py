@@ -1,5 +1,5 @@
-from game_state import PlayerColor, State
 import random
+from game_state import PlayerColor, State
 
 class GameEngine:
     def transition_model(self, state:State, action:int):

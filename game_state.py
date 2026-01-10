@@ -6,11 +6,12 @@ class PlayerColor(Enum):
 
 class State:
     """
-    white positions (frozenset),
-    black positions (frozenset),
-    player turn (bool): if it is True the black turn else white turn,
-    sticks (int 1 -> 5),
-    parent (state)
+    the Game State contains:
+        white positions (set),
+        black positions (set),
+        player turn (PlayerColor),
+        sticks (int 1 -> 5),
+        parent (state)
     """
 
     def __init__(self, white_positions:set = None, black_positions:set = None, current_player:PlayerColor = PlayerColor.BLACK, sticks:int = 0, parent = None):

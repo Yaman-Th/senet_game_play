@@ -69,7 +69,16 @@ class algorithmPlayerMode:
                       
     def restart(self):
         self.state = self.inital_state
+        self.state.sticks = 0
+        self.action = None
         self.waiting_for_sticks = False
+
+    def undo(self):
+        if self.state.parent is not None:
+            self.state = self.state.parent
+            self.state.sticks = 0
+            self.action = None
+            self.waiting_for_sticks = False
     
     def update(self):
         if self.game.state.current_player == PlayerColor.BLACK:
