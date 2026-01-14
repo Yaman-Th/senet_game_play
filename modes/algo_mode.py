@@ -1,95 +1,35 @@
-import time
-import pygame
-from copy import deepcopy
-from game_engine import GameEngine
-from game_state import PlayerColor, State
-from game_renderer.renderer import Renderer
+from game_state import PlayerColor
 from algorithms.expectiminimax import ExpectiMinimaxPlayer
 
 class algorithmMode:
     """Class that contain game loop (algorithm vs algorithm)"""
-    def __init__(self):
-        pygame.init()
+    def __init__(self, game):
+        self.game = game
         self.algo_black = ExpectiMinimaxPlayer(PlayerColor.BLACK)
         self.algo_white = ExpectiMinimaxPlayer(PlayerColor.WHITE)
-        self.renderer = Renderer()
-        self.engine = GameEngine()
-        self.inital_state = State()
-        self.state = deepcopy(self.inital_state)
-        self.action = None
-        self.waiting_for_sticks = False
-        # Loop properties
-        self.clock = pygame.time.Clock()
-        self.running = True
-        self.start_time =  time.time()
         
-    def processInput(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.running = False
-
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    self.running = False
-                elif event.key == pygame.K_z:
-                    self.undo()
-                elif event.key == pygame.K_r:
-                    self.restart()
-                      
-    def restart(self):
-        self.state = self.inital_state
-        self.state.sticks = 0
-        self.action = None
-        self.waiting_for_sticks = False
-
-    def undo(self):
-        if self.state.parent is not None:
-            self.state = self.state.parent
-            self.state.sticks = 0
-            self.action = None
-            self.waiting_for_sticks = False
+    def processInput(self, events):
+        pass
     
     def update(self):
-        # AI turn (Black)
-        if self.state.current_player == PlayerColor.BLACK:
-            sticks = self.engine.TossStick()
-            self.state.sticks = sticks
-            self.engine.handle_special_houses(self.state)
-            if not self.engine.actions(self.state):
-                self.state.change_player()
-            best_action = self.algo_black.find_best_move(self.state)
-            self.action = best_action[0]
-            new_state = self.engine.transition_model(self.state, self.action)
-            if new_state is None:
-                return
-            self.state = new_state
-            self.action = None
-        # AI Turn (White)
-        elif self.state.current_player == PlayerColor.WHITE:
-            sticks = self.engine.TossStick()
-            self.state.sticks = sticks
-            self.engine.handle_special_houses(self.state)
-            if not self.engine.actions(self.state):
-                self.state.change_player()
-            best_action = self.algo_white.find_best_move(self.state)
-            self.action = best_action[0]
-            new_state = self.engine.transition_model(self.state, self.action)
-            if new_state is None:
-                return
-            self.state = new_state
-            self.action = None
-                 
-    def render(self):
-        self.renderer.render(self.state, self.start_time, self.engine.actions(self.state))
-    
-    def run(self):
-        while self.running:
-            self.processInput()
-            self.update()
-            self.render()
-            self.clock.tick(60)
+        if self.game.state.current_player == PlayerColor.BLACK:
+            self._algorithm_turn(self.algo_black)
+        elif self.game.state.current_player == PlayerColor.WHITE:
+            self._algorithm_turn(self.algo_white)
+
+    def _algorithm_turn(self, ai_player):
+        sticks = self.game.engine.TossStick()
+        self.game.state.sticks = sticks
+        self.game.engine.handle_special_houses(self.game.state)
+
+        if not self.game.engine.actions(self.game.state):
+            self.game.state.change_player()
+            return
         
-        self.elapsed_time = time.time() - self.start_time
-        print(f"Time: {self.elapsed_time:.2f}s")
-        pygame.quit()
-        exit()
+        best_action = ai_player.find_best_move(self.game.state)
+        if best_action and best_action[0] is not None:
+            self.game.action = best_action[0]
+            new_state = self.game.engine.transition_model(self.game.state, self.game.action)
+            if new_state is not None:
+                self.game.state = new_state
+                self.game.action = None
