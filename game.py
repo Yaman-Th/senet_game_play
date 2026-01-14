@@ -1,6 +1,12 @@
+import time
+import pygame
+from copy import deepcopy
 from enum import Enum, auto
+from game_state import State
+from game_engine import GameEngine
 from modes.player_mode import PLayerMode
 from modes.algo_mode import algorithmMode
+from game_renderer.renderer import Renderer
 from modes.algo_player_mode import algorithmPlayerMode
 
 class Mode(Enum):
@@ -11,18 +17,78 @@ class Mode(Enum):
 class Game:
     """
     this class guide you to game mode
+    and contain the Game Loop
     e.g: Game -> PLayer_mode
               -> algo_player_mode
               -> algorithm_mode
     """
     def __init__(self, mode:Mode):
-        self.mode = mode
+        pygame.init()
+        self.mode = self._create_mode_instance(mode)
+        self.renderer = Renderer()
+        self.engine = GameEngine()
+        self.initial_state = State()
+        self.state = deepcopy(self.initial_state)
+        self.action = None
+        self.clock = pygame.time.Clock()
+        self.running = True
+        self.start_time = time.time()
+
+    def _create_mode_instance(self, mode:Mode):
+        if mode == Mode.PLAYER_MODE:
+            return PLayerMode(self)
+        elif mode == Mode.ALGORITHM_AND_PLAYER_MODE:
+            return algorithmPlayerMode(self)
+        elif mode == Mode.ALGORITHM_MODE:
+            return algorithmMode(self)
+        else:
+            raise ValueError(f"Unknown game mode: {mode}")
+
+    def processInput(self):
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                self.running = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.running = False
+                elif event.key == pygame.K_z:
+                    self.undo()
+                elif event.key == pygame.K_r:
+                    self.restart()
+        
+        self.mode.processInput(events)
+
+    def update(self):
+        self.mode.update()
+
+    def render(self):
+        self.renderer.render(
+            self.state,
+            self.start_time,
+            self.engine.actions(self.state)
+        )
+
+    def restart(self):
+        self.state = deepcopy(self.initial_state)
+        self.state.sticks = 0
+        self.action = None
+
+    def undo(self):
+        if self.state.parent is not None:
+            self.state = self.state.parent
+            self.state.sticks = 0
+            self.action = None
 
     def run(self):
-        if self.mode == Mode.PLAYER_MODE:
-            game_loop = PLayerMode()
-        elif self.mode == Mode.ALGORITHM_AND_PLAYER_MODE:
-            game_loop = algorithmPlayerMode()
-        elif self.mode == Mode.ALGORITHM_MODE:
-            game_loop = algorithmMode()
-        game_loop.run()
+        while self.running:
+            self.processInput()
+            self.update()
+            self.render()
+            self.clock.tick(60)
+        
+        self.elapsed_time = time.time() - self.start_time
+        print(f"Time: {self.elapsed_time:.2f}s")
+        pygame.quit()
+        exit()
