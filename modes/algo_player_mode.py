@@ -34,38 +34,20 @@ class algorithmPlayerMode:
                     self.undo()
                 elif event.key == pygame.K_r:
                     self.restart()
-                    
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                # player turn (listen to mouse click)
-                if self.state.current_player == PlayerColor.WHITE:
-                    click_value = self.renderer.handle_events(
-                        event.button,
-                        self.state.sticks,
-                        self.state,
-                        self.engine.actions(self.state)
-                    )
-                    if click_value is None:
-                        continue
-                    elif click_value == -1:
-                        if not self.waiting_for_sticks:
+
+            if self.state.current_player == PlayerColor.WHITE:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                        click_value = self.renderer.handle_events(event.button, self.state.sticks, self.state, self.engine.actions(self.state))
+                        if click_value == None:
+                            return
+                        elif click_value == -1:
                             sticks = self.engine.TossStick()
                             self.state.sticks = sticks
                             self.engine.handle_special_houses(self.state)
-                            self.waiting_for_sticks = True
-                            valid_actions = self.engine.actions(self.state)
-                            if not valid_actions:
-                                self.state.current_player = PlayerColor.BLACK
-                                self.state.sticks = 0
-                                self.waiting_for_sticks = False
-                            else:
-                                self.waiting_for_sticks = True
-                    else:
-                        if self.waiting_for_sticks and self.state.sticks:
-                            self.action = click_value
-                            self.waiting_for_sticks = False
-                # AI turn (ignore mouse click)
-                else:
-                    pass
+                        else:
+                            self.action = click_value 
+            else:
+                pass
                       
     def restart(self):
         self.state = self.inital_state
