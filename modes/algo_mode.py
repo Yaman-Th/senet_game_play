@@ -55,6 +55,8 @@ class algorithmMode:
             sticks = self.engine.TossStick()
             self.state.sticks = sticks
             self.engine.handle_special_houses(self.state)
+            if not self.engine.actions(self.state):
+                self.state.change_player()
             best_action = self.algo_black.find_best_move(self.state)
             self.action = best_action[0]
             new_state = self.engine.transition_model(self.state, self.action)
@@ -67,6 +69,8 @@ class algorithmMode:
             sticks = self.engine.TossStick()
             self.state.sticks = sticks
             self.engine.handle_special_houses(self.state)
+            if not self.engine.actions(self.state):
+                self.state.change_player()
             best_action = self.algo_white.find_best_move(self.state)
             self.action = best_action[0]
             new_state = self.engine.transition_model(self.state, self.action)
