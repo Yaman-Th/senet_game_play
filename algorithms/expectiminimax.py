@@ -15,12 +15,9 @@ class ExpectiMinimaxPlayer:
         self.visited_states=0
         possible_moves = self.game_engine.actions(state)
         best_move = -1
-        # print(f"Possible moves: {possible_moves}")
         if state.current_player == self.player_color:
             best_value = -math.inf  
-            for move in possible_moves:
-                # print("-"*100)
-                # print(f"Evaluating move: {move}")
+            for move in possible_moves:                
                 next_state = self.game_engine.transition_model(state, move)
                 if next_state is None:
                     continue
@@ -105,7 +102,10 @@ class ExpectiMinimaxPlayer:
 
     def get_value(self, state: State, depth: int) -> float:
         self.visited_states+=1
-        if depth == 0 or self._is_game_over(state):
+        # if depth>0:
+            # print("DEPTH:", depth, "PLAYER:", state.current_player)
+        if depth <= 0 or self._is_game_over(state):
+            # print("LEAF/EVAL depth", depth, "player", state.current_player)
             return self.evaluate(state)
         
         possible_moves = self.game_engine.actions(state)
@@ -117,6 +117,7 @@ class ExpectiMinimaxPlayer:
         
         # max player's turn
         if state.current_player == self.player_color:
+            print(f"max")
             max_value = -math.inf
             for move in possible_moves:
                 next_state = self.game_engine.transition_model(state, move)
@@ -129,6 +130,7 @@ class ExpectiMinimaxPlayer:
 
         #min player's turn
         else:
+            print(f"min")
             min_value = math.inf
             for move in possible_moves:
                 next_state = self.game_engine.transition_model(state, move)
@@ -175,10 +177,10 @@ def run_ai_tests():
     # The AI MUST choose to move pawn 29.
     print("\n--- Test 1: Obvious Winning Move ---")
     state1 = State(
-        white_positions={1, 2, 3},
-        black_positions={25, 29},
-        current_player=PlayerColor.BLACK,
-        sticks=2 
+        white_positions={1, 3, 5,7,9,11,13},
+        black_positions={25},
+        current_player=PlayerColor.WHITE,
+        sticks=1 
     )
     best_move1 = ai_player.find_best_move(state1)
     print(f"Board: Black has pawns at {state1.black_positions}. Sticks roll is 2.")
