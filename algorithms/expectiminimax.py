@@ -11,38 +11,40 @@ class ExpectiMinimaxPlayer:
         self.probabilities = {1: 4/16, 2: 6/16, 3: 4/16, 4: 1/16, 5: 1/16}
         self.visited_states=0
         
-    def minimax(self, state:State, depth) -> float:
+    def find_best_move(self, state:State) -> int:
+        if state.current_player != self.player_color:
+            raise ValueError("find_best_move should be called when it's the Algorithem's turn")
         self.visited_states=0
         possible_moves = self.game_engine.actions(state)
+        if not possible_moves:
+            return -1, self.evaluate(state)
         best_move = -1
-        if state.current_player == self.player_color:
-            best_value = -math.inf  
-            for move in possible_moves:                
-                next_state = self.game_engine.transition_model(state, move)
-
-                # if next_state is None:
-                #     continue
-
-                value = max(value, self.minimax(next_state, self.depth - 1))
-
-            return value
+        best_value = -math.inf  
+        # if state.current_player == self.player_color:
+        for move in possible_moves:                
+            next_state = self.game_engine.transition_model(state, move)
+            if next_state is None:
+                continue
+            # get expected value of the stat  e after move
+            value = self.expected_value(next_state, self.max_depth)
+            if value > best_value:
+                best_value = value
+                best_move = move
+        return best_move,best_value
+        # else:
+        #     best_value = math.inf
+        #     for move in possible_moves:
+        #         next_state = self.game_engine.transition_model(state, move)
+        #         if next_state is None:
+        #             continue
+        #         value = self.expected_value(next_state, self.max_depth)
+        #         if value< best_value:
+        #             best_value= value
+        #             best_move = move
+        #     return best_move,best_value
         
-        # if the node is MIN
-        elif state.current_player == PlayerColor.WHITE:
-            value = inf
-            for move in possible_moves:
 
-                next_state = self.game_engine.transition_model(state, move)
-
-                if next_state is None:
-                    continue
-                
-                value = min(value, self.minimax(next_state, self.depth - 1))
-            return value
-        
-
-
-    def _is_terminal(self, state: State) -> bool:
+    def _is_game_over(self, state: State) -> bool:
         return not state.white_positions or not state.black_positions
 
     # def _get_player_score(self, positions: frozenset) -> float:
