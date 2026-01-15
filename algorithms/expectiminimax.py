@@ -15,24 +15,9 @@ class ExpectiMinimaxPlayer:
         self.visited_states=0
         possible_moves = self.game_engine.actions(state)
         best_move = -1
-
-        if self.depth == 0 or self._is_terminal:
-            return self.evaluate(state)
-
-        # if the node is MAX
-        if state.current_player == PlayerColor.BLACK:
-            value = -inf  
-            for move in possible_moves:
-                expected = 0
-                for sticks_roll, probability in self.probabilities.items():
-                    roll_state = State(
-                        white_positions = deepcopy(state.white_positions),
-                        black_positions = deepcopy(state.black_positions),
-                        current_player = state.current_player,
-                        sticks = sticks_roll,
-                        parent = state.parent)
-                    expected += probability * self.minimax(roll_state, self.depth - 1)
-                return expected
+        if state.current_player == self.player_color:
+            best_value = -math.inf  
+            for move in possible_moves:                
                 next_state = self.game_engine.transition_model(state, move)
 
                 # if next_state is None:
@@ -115,10 +100,13 @@ class ExpectiMinimaxPlayer:
 
     #     return total_expected_value
 
-    # def get_value(self, state: State, depth: int) -> float:
-    #     self.visited_states+=1
-    #     if depth == 0 or self._is_game_over(state):
-    #         return self.evaluate(state)
+    def get_value(self, state: State, depth: int) -> float:
+        self.visited_states+=1
+        # if depth>0:
+            # print("DEPTH:", depth, "PLAYER:", state.current_player)
+        if depth <= 0 or self._is_game_over(state):
+            # print("LEAF/EVAL depth", depth, "player", state.current_player)
+            return self.evaluate(state)
         
     #     possible_moves = self.game_engine.actions(state)
         
@@ -127,27 +115,29 @@ class ExpectiMinimaxPlayer:
     #         skipped_state = State(state.white_positions, state.black_positions, next_Player, 0, state)
     #         return self.expected_value(skipped_state, depth-1)
         
-    #     # max player's turn
-    #     if state.current_player == self.player_color:
-    #         max_value = -math.inf
-    #         for move in possible_moves:
-    #             next_state = self.game_engine.transition_model(state, move)
-    #             if next_state is None:
-    #                 continue
-    #             value = self.expected_value(next_state, depth-1)
-    #             max_value = max(max_value,value)
+        # max player's turn
+        if state.current_player == self.player_color:
+            print(f"max")
+            max_value = -math.inf
+            for move in possible_moves:
+                next_state = self.game_engine.transition_model(state, move)
+                if next_state is None:
+                    continue
+                value = self.expected_value(next_state, depth-1)
+                max_value = max(max_value,value)
 
     #         return max_value
 
-    #     #min player's turn
-    #     else:
-    #         min_value = math.inf
-    #         for move in possible_moves:
-    #             next_state = self.game_engine.transition_model(state, move)
-    #             if next_state is None:
-    #                 continue
-    #             value = self.expected_value(next_state, depth-1)
-    #             min_value = min(min_value, value)
+        #min player's turn
+        else:
+            print(f"min")
+            min_value = math.inf
+            for move in possible_moves:
+                next_state = self.game_engine.transition_model(state, move)
+                if next_state is None:
+                    continue
+                value = self.expected_value(next_state, depth-1)
+                min_value = min(min_value, value)
 
     #         return min_value
      
@@ -187,10 +177,10 @@ def run_ai_tests():
     # The AI MUST choose to move pawn 29.
     print("\n--- Test 1: Obvious Winning Move ---")
     state1 = State(
-        white_positions={1, 2, 3},
-        black_positions={25, 29},
-        current_player=PlayerColor.BLACK,
-        sticks=2 
+        white_positions={1, 3, 5,7,9,11,13},
+        black_positions={25},
+        current_player=PlayerColor.WHITE,
+        sticks=1 
     )
     best_move1 = ai_player.find_best_move(state1)
     print(f"Board: Black has pawns at {state1.black_positions}. Sticks roll is 2.")
