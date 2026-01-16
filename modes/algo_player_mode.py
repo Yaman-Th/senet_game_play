@@ -1,12 +1,13 @@
 import pygame
 from game_state import PlayerColor
-from algorithms.expectiminimax import ExpectiMinimaxPlayer
+# from algorithms.expectiminimax import ExpectiMinimaxPlayer
+from algorithms.algorithm import ExpectiMinimaxPlayer
 
 class algorithmPlayerMode:
     """Class that contain game loop (algorithm vs player)"""
     def __init__(self, game):
         self.game = game
-        self.algo = ExpectiMinimaxPlayer(PlayerColor.BLACK)
+        self.algo = ExpectiMinimaxPlayer(4)
         
     def processInput(self, events):
         if self.game.state.current_player == PlayerColor.WHITE:
@@ -42,10 +43,10 @@ class algorithmPlayerMode:
             self.game.state.change_player()
             return
         
-        best_action = self.algo.find_best_move(self.game.state)
+        best_action = self.algo.best_action(self.game.state)
         
-        if best_action and best_action[0] is not None:
-            self.game.action = best_action[0]
+        if best_action and best_action is not None:
+            self.game.action = best_action
             new_state = self.game.engine.transition_model(self.game.state, self.game.action)
             if new_state is not None:
                 self.game.state = new_state
