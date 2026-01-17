@@ -25,3 +25,14 @@ class State:
         next_player = PlayerColor.BLACK if self.current_player == PlayerColor.WHITE else PlayerColor.WHITE
         self.current_player = next_player
         self.sticks = 0
+
+    def is_terminal(self):
+        if not self.black_positions or not self.white_positions:
+            return True
+        return False
+    
+    def winner(self):
+        if not self.black_positions:
+            return "Black Player Win!"
+        elif not self.white_positions:
+            return "White Player Win!"
