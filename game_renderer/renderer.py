@@ -1,4 +1,5 @@
 import pygame
+import pygame.gfxdraw
 from game_state import State, PlayerColor
 from os.path import join
 
@@ -7,8 +8,9 @@ class Data:
         self.cell = cell
         self.margin = margin
         self.module = cell + margin
-        self.grid_c, self.grid_r = 1, 2
-        self.grid_x, self.grid_y = self.get_coordinate(self.grid_r, self.grid_c)
+        self.grid_c, self.grid_r = 0, 2
+        self.grid_x = self.get_coordinate(self.grid_r, self.grid_c)[0] + self.margin
+        self.grid_y = self.get_coordinate(self.grid_r, self.grid_c)[1]
         self.elements = {15: (1, 5), 26: (2, 5), 27: (2, 6), 28: (2, 7), 29: (2, 8), 30: (2, 9)}
         self.colors = {
             'light': (221, 160, 98),
@@ -77,13 +79,13 @@ class Renderer:
         # all static data
         self.data = Data(90, 9)
         # screen data
-        self.screen_w = self.data.get_length(14)
-        self.screen_h = self.data.get_length(6)
+        self.screen_w = self.data.get_length(12) + self.data.margin
+        self.screen_h = self.data.get_length(5)
         self.screen = self.init_screen(self.screen_w, self.screen_h)
         
         self.font = pygame.font.Font(None, 36)
         self.small_font = pygame.font.Font(None, 28)
-        self.sticks_font = pygame.font.Font(None, int(self.data.cell // 2.5)) 
+        self.sticks_font = pygame.font.Font(None, int(self.data.cell // 3)) 
         self.playerRadius = int(self.data.cell // 4)
         self.IMAGES = {
             15      : pygame.image.load(join('images', 'start_1.png')).convert_alpha(),   # start
@@ -160,16 +162,21 @@ class Renderer:
             x, y = self.data.move(self.data.get_coordinate(r, c))
             
             player_center =  self.data.get_center(x, y, self.data.cell, self.data.cell)
-                       
-            pygame.draw.circle(self.screen, self.data.colors['white'], player_center, self.playerRadius)
+            pygame.gfxdraw.filled_circle(self.screen, player_center[0], player_center[1], self.playerRadius, self.data.colors['white'])
+            pygame.gfxdraw.aacircle(self.screen, player_center[0], player_center[1], self.playerRadius, self.data.colors['white'])
+            
+            # pygame.draw.circle(self.screen, self.data.colors['white'], player_center, self.playerRadius)
         
         for pos in state.black_positions :            
             r, c = self.data.positions[pos][0], self.data.positions[pos][1]
             x, y = self.data.move(self.data.get_coordinate(r, c))
             
             player_center = self.data.get_center(x, y, self.data.cell, self.data.cell)
-                        
-            pygame.draw.circle(self.screen, self.data.colors['black'], player_center, self.playerRadius)
+            
+            pygame.gfxdraw.filled_circle(self.screen, player_center[0], player_center[1], self.playerRadius, self.data.colors['black'])
+            pygame.gfxdraw.aacircle(self.screen, player_center[0], player_center[1], self.playerRadius, self.data.colors['black'])
+                
+            # pygame.draw.circle(self.screen, self.data.colors['black'], player_center, self.playerRadius)
     
     def draw_elements(self):
         for key, value in self.data.elements.items():
@@ -183,9 +190,9 @@ class Renderer:
             self.screen.blit(image, image_center)
     
     def draw_current_player(self, state:State):
-        info_panel_x, info_panel_y = self.data.get_coordinate(0, 10)
-        info_panel_w, info_panel_h = self.data.get_length(1.93), self.data.get_length(1.93)
-        
+        r, c = 0, 10
+        info_panel_x, info_panel_y = self.data.get_coordinate(r, c)
+        info_panel_w, info_panel_h = self.data.get_length(2) - self.data.margin, self.data.get_length(2) - self.data.margin        
         rect = pygame.Rect(info_panel_x, info_panel_y, info_panel_w, info_panel_h).move(self.data.grid_x, self.data.grid_y)
         
         if state.current_player == PlayerColor.WHITE:
@@ -196,24 +203,44 @@ class Renderer:
         pygame.draw.rect(self.screen, color, rect, border_radius=20)
     
     def draw_score(self,state:State):
-        r, c = 0, 1
-        x, y = self.data.get_coordinate(r, c)
-        white_score = 7 - len(state.white_positions)
-        for i in range(white_score):
-            y = y + 6
-            player_center =  self.data.get_center(x, y, self.data.cell, self.data.cell)
-            pygame.draw.circle(self.screen, self.data.colors['light'], player_center, radius=self.playerRadius + 2)
-            pygame.draw.circle(self.screen, self.data.colors['white'], player_center, radius=self.playerRadius)
         
-        r, c = 0, 2
+        r, c = 0, 10
         x, y = self.data.get_coordinate(r, c)
+        w, h = self.data.get_length_cell(1), self.data.get_length_cell(2) 
+        rect = pygame.Rect(x, y, w, h).move(self.data.grid_x, 8)
+        pygame.draw.rect(self.screen, self.data.colors['light'], rect, border_radius=20)
+        text_surface = self.sticks_font.render("WHITE", True, self.data.colors['white'])
+        text_rect = text_surface.get_rect(centerx=rect.centerx, bottom=rect.bottom - 16)
+        self.screen.blit(text_surface, text_rect)
+        
+        white_score = 7 - len(state.white_positions)
+        player_y = rect.y - 10
+        for i in range(white_score):
+            player_x, player_y = rect.x, player_y + 10
+            player_center =  self.data.get_center(player_x, player_y, self.data.cell, self.data.cell)
+            pygame.gfxdraw.aacircle(self.screen, player_center[0], player_center[1], self.playerRadius, self.data.colors['white'])
+            pygame.gfxdraw.filled_circle(self.screen, player_center[0], player_center[1], self.playerRadius, self.data.colors['white'])
+            pygame.gfxdraw.aacircle(self.screen, player_center[0], player_center[1], self.playerRadius, self.data.colors['brown'])
+        
+        
+        r, c = 0, 11
+        x, y = self.data.get_coordinate(r, c)
+        w, h = self.data.get_length_cell(1), self.data.get_length_cell(2)
+        rect = pygame.Rect(x, y, w, h).move(self.data.grid_x, 8)
+        pygame.draw.rect(self.screen, self.data.colors['light'], rect, border_radius=20)
+        text_surface = self.sticks_font.render("BLACK", True, self.data.colors['black'])
+        text_rect = text_surface.get_rect(centerx=rect.centerx, bottom=rect.bottom - 16)
+        self.screen.blit(text_surface, text_rect)
+        
         black_score = 7 - len(state.black_positions)
+        player_y = rect.y - 10
         for i in range(black_score):
-            y = y + 6
-            player_center =  self.data.get_center(x, y, self.data.cell, self.data.cell)
-            pygame.draw.circle(self.screen, self.data.colors['light'], player_center, radius=self.playerRadius + 2)
-            pygame.draw.circle(self.screen, self.data.colors['black'], player_center, radius=self.playerRadius)
-                       
+            player_x, player_y = rect.x, player_y + 10
+            player_center =  self.data.get_center(player_x, player_y, self.data.cell, self.data.cell)
+            pygame.gfxdraw.aacircle(self.screen, player_center[0], player_center[1], self.playerRadius, self.data.colors['black'])
+            pygame.gfxdraw.filled_circle(self.screen, player_center[0], player_center[1], self.playerRadius, self.data.colors['black'])
+            pygame.gfxdraw.aacircle(self.screen, player_center[0], player_center[1], self.playerRadius, self.data.colors['brown'])
+            
     def draw_sticks(self):
         
         info_panel_x, info_panel_y = self.data.get_coordinate(0, 10)

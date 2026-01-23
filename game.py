@@ -8,11 +8,13 @@ from modes.player_mode import PLayerMode
 from modes.algo_mode import algorithmMode
 from game_renderer.renderer import Renderer
 from modes.algo_player_mode import algorithmPlayerMode
+from modes.algo_random_mode import algorithmAndRandMode
 
 class Mode(Enum):
     PLAYER_MODE = auto()
     ALGORITHM_AND_PLAYER_MODE = auto()
     ALGORITHM_MODE = auto()
+    ALGORITHM_AND_RANDOM_MODE = auto()
 
 class Game:
     """
@@ -41,6 +43,8 @@ class Game:
             return algorithmPlayerMode(self)
         elif mode == Mode.ALGORITHM_MODE:
             return algorithmMode(self)
+        elif mode == Mode.ALGORITHM_AND_RANDOM_MODE:
+            return algorithmAndRandMode(self)
         else:
             raise ValueError(f"Unknown game mode: {mode}")
 

@@ -4,12 +4,12 @@ from algorithms.algorithm import ExpectiMinimaxPlayer
 import random
 from copy import deepcopy
 
-class algorithmMode:
+class algorithmAndRandMode:
     """Class that contain game loop (algorithm vs algorithm)"""
     def __init__(self, game):
         self.game = game
         self.algo_black = ExpectiMinimaxPlayer(4)
-        self.algo_white = ExpectiMinimaxPlayer(4)
+        # self.algo_white = ExpectiMinimaxPlayer(PlayerColor.WHITE)
         
     def processInput(self, events):
         pass
@@ -18,8 +18,8 @@ class algorithmMode:
         if self.game.state.current_player == PlayerColor.BLACK:
             self._algorithm_turn(self.algo_black)
         elif self.game.state.current_player == PlayerColor.WHITE:
-            self._algorithm_turn(self.algo_white)
-            # self._random_agent_turn()
+            # self._algorithm_turn(self.algo_white)
+            self._random_agent_turn()
 
     def _algorithm_turn(self, ai_player):
         sticks = self.game.engine.TossStick()
@@ -31,7 +31,6 @@ class algorithmMode:
             return
         
         ai_state = deepcopy(self.game.state)
-        
         best_action = ai_player.best_action(ai_state)
         
         if best_action and best_action is not None:
