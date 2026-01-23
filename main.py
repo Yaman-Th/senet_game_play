@@ -2,6 +2,7 @@ import sys
 from game import Mode, Game
 
 def main():
+    sys.setrecursionlimit(10000)
     argc = len(sys.argv)
     if argc != 2:
         print("missing command line arguments")

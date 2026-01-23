@@ -33,6 +33,6 @@ class State:
     
     def winner(self):
         if not self.black_positions:
-            return "Black Player Win!"
+            return "Black"
         elif not self.white_positions:
-            return "White Player Win!"
+            return "White"
