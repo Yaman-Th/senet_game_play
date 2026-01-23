@@ -96,23 +96,26 @@ class Renderer:
             "sticks": pygame.image.load(join('images', 'stick.png'  )).convert_alpha(),   # 4 sticks 
             }
     
-    def render(self, state, start_time, actions):
+    def render(self, state:State, start_time, actions):
         """
         rendering all screen elements
         
         :param state: state that rendered
         :param start_time: using to rendering elapsed time
         """
-        self.screen.fill(self.data.colors['brown'])
-        self.draw_grid()
-        # self.draw_sticks()
-        self.draw_sticks_value(state)
-        self.draw_current_player(state)
-        self.draw_score(state)
-        self.draw_skip_button()
-        self.draw_actions(actions, state)
-        self.draw_elements()
-        self.draw_players(state)
+        if state.is_terminal():    
+            self.draw_winner(state.winner())
+        else:
+            self.screen.fill(self.data.colors['brown'])
+            self.draw_grid()
+            # self.draw_sticks()
+            self.draw_sticks_value(state)
+            self.draw_current_player(state)
+            self.draw_score(state)
+            self.draw_skip_button()
+            self.draw_actions(actions, state)
+            self.draw_elements()
+            self.draw_players(state)
         pygame.display.update()
     
     def init_screen(self, w, h):
@@ -317,3 +320,15 @@ class Renderer:
             else:
                 print(f"Pos:{pos}, Cell: {cell}")
                 return cell
+            
+    def draw_winner(self, winner:str):
+        # r, c = self.data.positions[1]
+        # x, y = self.data.get_coordinate(r, c)
+        x, y =0, 0
+        
+        rect = pygame.Rect(x, y, self.screen_w, self.screen_h)
+        pygame.draw.rect(self.screen, self.data.colors['light'], rect)
+        text_surface = self.sticks_font.render(f"{winner} Win!", True, self.data.colors['brown'])
+        text_rect = text_surface.get_rect(center=rect.center)
+        
+        self.screen.blit(text_surface, text_rect)
