@@ -18,6 +18,8 @@ def main():
             game = Game(Mode.ALGORITHM_AND_PLAYER_MODE)
         if mode_input == "algorithm_mode":
             game = Game(Mode.ALGORITHM_MODE)
+        if mode_input == "algorithm_and_random_mode":
+            game = Game(Mode.ALGORITHM_AND_RANDOM_MODE)
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
