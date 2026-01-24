@@ -13,6 +13,10 @@ class algorithmPlayerMode:
         self.turn = None
         self.actions = None
         self.best_action = 0
+        self.jump_sfx = pygame.mixer.Sound("move.wav")
+        self.toss_sfx = pygame.mixer.Sound("toss.mp3")
+        self.toss_sfx.set_volume(1)
+        self.jump_sfx.set_volume(1)
         
     def processInput(self, events):
         if self.game.state.current_player == PlayerColor.WHITE:
@@ -24,9 +28,12 @@ class algorithmPlayerMode:
                         self.game.state,
                         self.game.engine.actions(self.game.state)
                     )
+                    self.jump_sfx.play()
+                    
                     if click_value is None:
                         continue
                     elif click_value == -1:
+                        self.toss_sfx.play()
                         sticks = self.game.engine.TossStick()
                         self.sticks = sticks
                         self.game.state.sticks = sticks
@@ -47,6 +54,7 @@ class algorithmPlayerMode:
         
     def _algorithm_turn(self):
         sticks = self.game.engine.TossStick()
+        # self.toss_sfx.play()
         self.sticks = sticks
         self.game.state.sticks = sticks
         self.game.engine.handle_special_houses(self.game.state)
@@ -61,6 +69,7 @@ class algorithmPlayerMode:
         
         best_action = self.algo.best_action(self.game.state)
         self.best_action = best_action
+        self.jump_sfx.play()
         
         if best_action and best_action is not None:
             self.game.action = best_action

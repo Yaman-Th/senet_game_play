@@ -1,3 +1,5 @@
+
+import pygame
 from game_state import PlayerColor
 # from algorithms.expectiminimax import ExpectiMinimaxPlayer
 from algorithms.algorithm import ExpectiMinimaxPlayer
@@ -16,6 +18,8 @@ class algorithmMode:
         self.turn = None
         self.actions = None
         self.best_action = 0
+        self.jump_sfx = pygame.mixer.Sound("move.wav")
+        self.jump_sfx.set_volume(1)
         
     def processInput(self, events):
         pass
@@ -53,6 +57,7 @@ class algorithmMode:
         
         best_action = ai_player.best_action(ai_state)
         self.best_action = best_action
+        self.jump_sfx.play()
         
         if best_action and best_action is not None:
             self.game.action = best_action

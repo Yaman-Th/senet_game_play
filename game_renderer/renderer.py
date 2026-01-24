@@ -32,6 +32,8 @@ class Data:
             (1, 9): 11, (1, 8): 12, (1, 7): 13, (1, 6): 14, (1, 5): 15, (1, 4): 16, (1, 3): 17, (1, 2): 18, (1, 1): 19, (1, 0): 20,
             (2, 0): 21, (2, 1): 22, (2, 2): 23, (2, 3): 24, (2, 4): 25, (2, 5): 26, (2, 6): 27, (2, 7): 28, (2, 8): 29, (2, 9): 30, (2, 11): 31
         }
+        self.win_sfx = pygame.mixer.Sound("wow.mp3")
+        self.win_sfx.set_volume(1)
         
     def get_length(self, repeat):
         """
@@ -107,6 +109,7 @@ class Renderer:
         :param start_time: using to rendering elapsed time
         """
         if state.is_terminal():    
+            self.data.win_sfx.play()
             self.draw_winner(state.winner())
         else:
             self.screen.fill(self.data.colors['brown'])
@@ -341,6 +344,7 @@ class Renderer:
             pos = pygame.mouse.get_pos()
             x, y = pos[0], pos[1]
             cell = self.get_cell_number(x, y)
+            
             
             if cell == 0 and not actions and sticks != 0:
                 self.skip_turn(state)
