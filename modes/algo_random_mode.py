@@ -1,4 +1,5 @@
 from game_state import PlayerColor
+import pygame
 # from algorithms.expectiminimax import ExpectiMinimaxPlayer
 from algorithms.algorithm import ExpectiMinimaxPlayer
 import random
@@ -15,7 +16,8 @@ class algorithmAndRandMode:
         self.actions = None
         self.action = None
         self.turn = None
-        # self.algo_white = ExpectiMinimaxPlayer(PlayerColor.WHITE)
+        self.jump_sfx = pygame.mixer.Sound("move.wav")
+        self.jump_sfx.set_volume(1)
         
     def processInput(self, events):
         pass
@@ -26,7 +28,6 @@ class algorithmAndRandMode:
             self._algorithm_turn(self.algo_black)
         elif self.game.state.current_player == PlayerColor.WHITE:
             self.turn = "White"
-            # self._algorithm_turn(self.algo_white)
             self._random_agent_turn()
 
     def _algorithm_turn(self, ai_player):
@@ -46,6 +47,7 @@ class algorithmAndRandMode:
         ai_state = deepcopy(self.game.state)
         best_action = ai_player.best_action(ai_state)
         self.action = best_action
+        self.jump_sfx.play()
         
         if best_action and best_action is not None:
             self.game.action = best_action
@@ -67,6 +69,7 @@ class algorithmAndRandMode:
         self.actions = actions
         # best_action = ai_player.find_best_move(self.game.state)
         action = random.choice(list(actions))
+        self.jump_sfx.play()
         self.action = action
         
         if action and action is not None:
