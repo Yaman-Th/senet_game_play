@@ -382,9 +382,10 @@ class Renderer:
         text_rect_3 = text_surface_3.get_rect(centerx=rect.centerx, bottom=rect.bottom - 90)
         text_rect_4 = text_surface_4.get_rect(centerx=rect.centerx, bottom=rect.bottom - 115)
         
-        text_surface_5 = self.sticks_font.render(f"Visited_Nodes: {visited_nodes[-1]}", True, self.data.colors['black'])
-        text_rect_5 = text_surface_5.get_rect(centerx=rect.centerx, bottom=rect.bottom - 140)
-        self.screen.blit(text_surface_5, text_rect_5)
+        if visited_nodes:
+            text_surface_5 = self.sticks_font.render(f"Visited_Nodes: {visited_nodes[-1]}", True, self.data.colors['black'])
+            text_rect_5 = text_surface_5.get_rect(centerx=rect.centerx, bottom=rect.bottom - 140)
+            self.screen.blit(text_surface_5, text_rect_5)
         
         
         self.screen.blit(text_surface, text_rect)
