@@ -43,7 +43,7 @@ class algorithmPlayerMode:
             self._player_turn()
 
     def render(self):
-        self.renderer.render(self.game.state, self.game.engine.actions(self.game.state), self.sticks, self.turn, self.best_action, self.algo.stats())
+        self.renderer.render(self.game.state, self.game.engine.actions(self.game.state), self.sticks, self.turn, self.best_action, self.algo.stats()[0], self.algo.stats()[1])
         
     def _algorithm_turn(self):
         sticks = self.game.engine.TossStick()
