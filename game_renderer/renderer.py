@@ -13,8 +13,8 @@ class Data:
         self.grid_y = self.get_coordinate(self.grid_r, self.grid_c)[1]
         self.elements = {15: (1, 5), 26: (2, 5), 27: (2, 6), 28: (2, 7), 29: (2, 8), 30: (2, 9)}
         self.colors = {
-            'light': (221, 160, 98),
-            'dark' : (240, 228, 216),
+            'dark': (221, 160, 98),
+            'light' : (240, 228, 216),
             'white': (255,252,242),
             'black': (27,18,4),
             'brown': (116,71,0),
@@ -77,7 +77,7 @@ class Data:
 class Renderer:
     def __init__(self):
         # all static data
-        self.data = Data(90, 9)
+        self.data = Data(90, 10)
         # screen data
         self.screen_w = self.data.get_length(12) + self.data.margin
         self.screen_h = self.data.get_length(5)
@@ -98,7 +98,7 @@ class Renderer:
             "sticks": pygame.image.load(join('images', 'stick.png'  )).convert_alpha(),   # 4 sticks 
             }
     
-    def render(self, state:State, start_time, actions):
+    def render(self, state:State, actions, sticks, turn, best_action, visited_nodes):
         """
         rendering all screen elements
         
@@ -111,13 +111,15 @@ class Renderer:
             self.screen.fill(self.data.colors['brown'])
             self.draw_grid()
             # self.draw_sticks()
-            self.draw_sticks_value(state)
+            self.draw_sticks_value(sticks)
             self.draw_current_player(state)
             self.draw_score(state)
             self.draw_skip_button()
             self.draw_actions(actions, state)
             self.draw_elements()
             self.draw_players(state)
+            self.render_ai_info(actions, sticks, turn, best_action, visited_nodes)
+            self.draw_title()
         pygame.display.update()
     
     def init_screen(self, w, h):
@@ -203,14 +205,13 @@ class Renderer:
         pygame.draw.rect(self.screen, color, rect, border_radius=20)
     
     def draw_score(self,state:State):
-        
-        r, c = 0, 10
+        r, c = 0, 0
         x, y = self.data.get_coordinate(r, c)
         w, h = self.data.get_length_cell(1), self.data.get_length_cell(2) 
-        rect = pygame.Rect(x, y, w, h).move(self.data.grid_x, 8)
-        pygame.draw.rect(self.screen, self.data.colors['light'], rect, border_radius=20)
+        rect = pygame.Rect(x, y, w, h).move(self.data.grid_x, self.data.margin)
+        pygame.draw.rect(self.screen, self.data.colors['dark'], rect, border_radius=20)
         text_surface = self.sticks_font.render("WHITE", True, self.data.colors['white'])
-        text_rect = text_surface.get_rect(centerx=rect.centerx, bottom=rect.bottom - 16)
+        text_rect = text_surface.get_rect(centerx=rect.centerx, bottom=rect.bottom - 20)
         self.screen.blit(text_surface, text_rect)
         
         white_score = 7 - len(state.white_positions)
@@ -223,13 +224,13 @@ class Renderer:
             pygame.gfxdraw.aacircle(self.screen, player_center[0], player_center[1], self.playerRadius, self.data.colors['brown'])
         
         
-        r, c = 0, 11
+        r, c = 0, 1
         x, y = self.data.get_coordinate(r, c)
         w, h = self.data.get_length_cell(1), self.data.get_length_cell(2)
-        rect = pygame.Rect(x, y, w, h).move(self.data.grid_x, 8)
-        pygame.draw.rect(self.screen, self.data.colors['light'], rect, border_radius=20)
+        rect = pygame.Rect(x, y, w, h).move(self.data.grid_x, self.data.margin)
+        pygame.draw.rect(self.screen, self.data.colors['dark'], rect, border_radius=20)
         text_surface = self.sticks_font.render("BLACK", True, self.data.colors['black'])
-        text_rect = text_surface.get_rect(centerx=rect.centerx, bottom=rect.bottom - 16)
+        text_rect = text_surface.get_rect(centerx=rect.centerx, bottom=rect.bottom - 20)
         self.screen.blit(text_surface, text_rect)
         
         black_score = 7 - len(state.black_positions)
@@ -257,7 +258,7 @@ class Renderer:
         
         self.screen.blit(image, image_center)
     
-    def draw_sticks_value(self, state:State):
+    def draw_sticks_value(self, sticks):
         r, c = self.data.positions[31][0], self.data.positions[31][1]
         x, y = self.data.move(self.data.get_coordinate(r, c))
         
@@ -268,9 +269,9 @@ class Renderer:
             text_color = self.data.colors['white']
             text = "TOSS"
         else:
-            color = self.data.colors['light']
+            color = self.data.colors['dark']
             text_color = self.data.colors['brown']
-            text = str(state.sticks)
+            text = str(sticks)
             
         text_surface = self.sticks_font.render(text, True, text_color)
         
@@ -289,7 +290,7 @@ class Renderer:
             return None
     
     def draw_actions(self, actions, state:State):
-        if not actions and state.sticks != 0:
+        if actions is None and state.sticks != 0:
             r, c = self.data.positions[0]
             x, y = self.data.get_coordinate(r, c)
             
@@ -321,7 +322,7 @@ class Renderer:
             color = self.data.colors['orange']
             text_color = self.data.colors['white']
         else:
-            color = self.data.colors['light']
+            color = self.data.colors['dark']
             text_color = self.data.colors['brown']
         
         pygame.draw.rect(self.screen, color, rect, border_radius=20)
@@ -359,3 +360,42 @@ class Renderer:
         text_rect = text_surface.get_rect(center=rect.center)
         
         self.screen.blit(text_surface, text_rect)
+
+    def render_ai_info(self, actions, sticks, turn, best_action, visited_nodes):
+        r, c = 0, 9
+        x, y = self.data.get_coordinate(r, c)
+        w, h = self.data.get_length(3) - self.data.margin, self.data.get_length(2) - self.data.margin*2
+        
+        rect = pygame.Rect(x, y, w, h).move(self.data.margin, self.data.margin)
+        pygame.draw.rect(self.screen, self.data.colors['dark'], rect, border_radius=20)
+        
+        text_surface = self.sticks_font.render("Tracking Panel", True, self.data.colors['brown'])
+        # text_surface_1 = self.sticks_font.render(f"actions: {actions}", True, self.data.colors['black'])
+        text_surface_2 = self.sticks_font.render(f"Sticks: {sticks}", True, self.data.colors['black'])
+        text_surface_3 = self.sticks_font.render(f"{turn} is Thinking!", True, self.data.colors['black'])
+        text_surface_4 = self.sticks_font.render(f"last_action: {best_action}", True, self.data.colors['black'])
+        text_surface_5 = self.sticks_font.render(f"visited_nodes: {visited_nodes}", True, self.data.colors['black'])
+        
+        text_rect = text_surface.get_rect(centerx=rect.centerx, bottom=rect.bottom - 10)
+        # text_rect_1 = text_surface_1.get_rect(centerx=rect.centerx, y=rect.centery-50)
+        text_rect_2 = text_surface_2.get_rect(centerx=rect.centerx, bottom=rect.bottom - 50)
+        text_rect_3 = text_surface_3.get_rect(centerx=rect.centerx, bottom=rect.bottom - 75)
+        text_rect_4 = text_surface_4.get_rect(centerx=rect.centerx, bottom=rect.bottom - 100)
+        text_rect_5 = text_surface_5.get_rect(centerx=rect.centerx, bottom=rect.bottom - 125)
+        
+        
+        self.screen.blit(text_surface, text_rect)
+        # self.screen.blit(text_surface_1, text_rect_1)
+        self.screen.blit(text_surface_2, text_rect_2)
+        self.screen.blit(text_surface_3, text_rect_3)
+        self.screen.blit(text_surface_4, text_rect_4)
+        self.screen.blit(text_surface_5, text_rect_5)
+        
+        
+    def draw_title(self):
+        r, c = 0, 2
+        x, y = self.data.get_coordinate(r, c)
+        w, h = self.data.get_length(7) - self.data.margin, self.data.get_length(2) - self.data.margin*2
+        
+        rect = pygame.Rect(x, y, w, h).move(self.data.margin, self.data.margin)
+        pygame.draw.rect(self.screen, self.data.colors['light'], rect, border_radius=20)

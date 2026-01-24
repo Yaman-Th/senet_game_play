@@ -1,18 +1,27 @@
 from math import inf
 from game_state import State, PlayerColor
 from game_engine import GameEngine
+from game_renderer import renderer
 from copy import deepcopy
 
 
 class ExpectiMinimaxPlayer:
     def __init__(self, depth: int):
         self.depth = depth
-        self.action = None
         self.game_engine = GameEngine()
         self.probabilities = {1: 4/16, 2: 6/16, 3: 4/16, 4: 1/16, 5: 1/16}
+        self.visited_nodes = 0
+        self.turn = None
+        self.action_scores = 0
+        self.action = None
         
-    def eminimax(self, state:State, depth:int, node:str, indent=0, is_root=False) -> float: # type: ignore
+    def eminimax(self, state:State, depth:int, node:str, indent=0, is_root=False, is_last=False) -> float: # type: ignore
+        # connector = "└── " if is_last else "├── "
+        # prefix = "    "*indent + ("    " if is_last else "│   ")
         print("  " * indent, node)
+        # print(prefix + connector + node)
+        
+        self.visited_nodes += 1
         possible_moves = self.game_engine.actions(state)
 
         if depth == 0 or state.is_terminal():
@@ -26,7 +35,7 @@ class ExpectiMinimaxPlayer:
 
                 next_node = "MAX" if state.current_player == PlayerColor.BLACK else "MIN"
 
-                value = self.eminimax(toss_state, depth - 1, next_node, indent + 1)
+                value = self.eminimax(toss_state, depth - 1, next_node, indent + 1, is_last=True)
                 
                 expected += prob * value
                 
@@ -77,19 +86,17 @@ class ExpectiMinimaxPlayer:
         
         
     def best_action(self, state:State):
-        
         if state.current_player == PlayerColor.BLACK:
             return self.best_action_max(state)
         elif state.current_player == PlayerColor.WHITE:
             return self.best_action_min(state)
         
     def best_action_max(self, state:State):
-
-        action = self.eminimax(state, 2, "MAX", is_root=True)
+        action = self.eminimax(state, self.depth, "MAX", is_root=True)
         return action
     
     def best_action_min(self, state:State):
-        action = self.eminimax(state, 2, "MIN", is_root=True)
+        action = self.eminimax(state, self.depth, "MIN", is_root=True)
         return action
 
 
@@ -130,3 +137,6 @@ class ExpectiMinimaxPlayer:
         white_score = self._get_player_score(state.white_positions)
         
         return black_score - white_score
+    
+    def stats(self):
+        return self.visited_nodes

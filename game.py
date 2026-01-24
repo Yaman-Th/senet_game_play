@@ -27,7 +27,7 @@ class Game:
     def __init__(self, mode:Mode):
         pygame.init()
         self.mode = self._create_mode_instance(mode)
-        self.renderer = Renderer()
+        # self.renderer = Renderer()
         self.engine = GameEngine()
         self.initial_state = State()
         self.state = deepcopy(self.initial_state)
@@ -68,11 +68,7 @@ class Game:
         self.mode.update()
 
     def render(self):
-        self.renderer.render(
-            self.state,
-            self.start_time,
-            self.engine.actions(self.state)
-        )
+        self.mode.render()
 
     def restart(self):
         self.state = deepcopy(self.initial_state)
