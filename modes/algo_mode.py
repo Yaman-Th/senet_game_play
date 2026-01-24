@@ -12,10 +12,10 @@ class algorithmMode:
         self.renderer = Renderer()
         self.algo_black = ExpectiMinimaxPlayer(2)
         self.algo_white = ExpectiMinimaxPlayer(2)
-        self.sticks = None
+        self.sticks = 0
         self.turn = None
         self.actions = None
-        self.best_action = None
+        self.best_action = 0
         
     def processInput(self, events):
         pass
@@ -54,4 +54,4 @@ class algorithmMode:
             if new_state is not None:
                 self.game.state = new_state
                 self.game.action = None
-                self.best_action = None
+                # self.best_action = 0
