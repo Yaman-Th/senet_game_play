@@ -99,7 +99,7 @@ class Renderer:
             "title": pygame.image.load(join('images', 'title.png'  )).convert_alpha(),   # 4 sticks
             }
     
-    def render(self, state:State, actions, sticks, turn, best_action, visited_nodes):
+    def render(self, state:State, actions, sticks, turn, best_action, visited_nodes, score):
         """
         rendering all screen elements
         
@@ -119,7 +119,7 @@ class Renderer:
             self.draw_actions(actions, state)
             self.draw_elements()
             self.draw_players(state)
-            self.render_ai_info(actions, sticks, turn, best_action, visited_nodes)
+            self.render_ai_info(actions, sticks, turn, best_action, visited_nodes, score)
             self.draw_title()
         pygame.display.update()
     
@@ -362,7 +362,7 @@ class Renderer:
         
         self.screen.blit(text_surface, text_rect)
 
-    def render_ai_info(self, actions, sticks, turn, best_action, visited_nodes):
+    def render_ai_info(self, actions, sticks, turn, best_action, visited_nodes, score):
         r, c = 0, 9
         x, y = self.data.get_coordinate(r, c)
         w, h = self.data.get_length(3) - self.data.margin, self.data.get_length(2) - self.data.margin*2
@@ -371,30 +371,24 @@ class Renderer:
         pygame.draw.rect(self.screen, self.data.colors['dark'], rect, border_radius=20)
         
         text_surface = self.sticks_font.render("Tracking Panel", True, self.data.colors['brown'])
-        # text_surface_1 = self.sticks_font.render(f"actions: {actions}", True, self.data.colors['black'])
+        text_surface_1 = self.sticks_font.render(f"Action Score: {score}", True, self.data.colors['black'])
         text_surface_2 = self.sticks_font.render(f"Sticks: {sticks}", True, self.data.colors['black'])
         text_surface_3 = self.sticks_font.render(f"{turn} is Thinking!", True, self.data.colors['black'])
         text_surface_4 = self.sticks_font.render(f"Action: {best_action} >>> {best_action + sticks}", True, self.data.colors['black'])
         
         text_rect = text_surface.get_rect(centerx=rect.centerx, bottom=rect.bottom - 10)
-        # text_rect_1 = text_surface_1.get_rect(centerx=rect.centerx, y=rect.centery-50)
-        text_rect_2 = text_surface_2.get_rect(centerx=rect.centerx, bottom=rect.bottom - 50)
-        text_rect_3 = text_surface_3.get_rect(centerx=rect.centerx, bottom=rect.bottom - 75)
-        text_rect_4 = text_surface_4.get_rect(centerx=rect.centerx, bottom=rect.bottom - 100)
+        text_rect_1 = text_surface_1.get_rect(centerx=rect.centerx, bottom=rect.bottom - 40)
+        text_rect_2 = text_surface_2.get_rect(centerx=rect.centerx, bottom=rect.bottom - 65)
+        text_rect_3 = text_surface_3.get_rect(centerx=rect.centerx, bottom=rect.bottom - 90)
+        text_rect_4 = text_surface_4.get_rect(centerx=rect.centerx, bottom=rect.bottom - 115)
         
         text_surface_5 = self.sticks_font.render(f"Visited_Nodes: {visited_nodes[-1]}", True, self.data.colors['black'])
-        text_rect_5 = text_surface_5.get_rect(centerx=rect.centerx, bottom=rect.bottom - 125)
+        text_rect_5 = text_surface_5.get_rect(centerx=rect.centerx, bottom=rect.bottom - 140)
         self.screen.blit(text_surface_5, text_rect_5)
-        # x = 0
-        # for i in range(0, 2):
-        #     x += 5
-        #     text_surface_5 = self.sticks_font.render(f"{visited_nodes[-i]}, ", True, self.data.colors['black'])
-        #     text_rect_5 = text_surface_5.get_rect(left=text_rect_5.right + x, bottom=rect.bottom - 125)
-        #     self.screen.blit(text_surface_5, text_rect_5)
         
         
         self.screen.blit(text_surface, text_rect)
-        # self.screen.blit(text_surface_1, text_rect_1)
+        self.screen.blit(text_surface_1, text_rect_1)
         self.screen.blit(text_surface_2, text_rect_2)
         self.screen.blit(text_surface_3, text_rect_3)
         self.screen.blit(text_surface_4, text_rect_4)

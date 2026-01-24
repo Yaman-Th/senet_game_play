@@ -82,4 +82,4 @@ class algorithmAndRandMode:
                              self.sticks,
                              self.turn,
                              self.action,
-                             self.algo_black.stats())
+                              self.algo_black.stats()[0], self.algo_black.stats()[1])

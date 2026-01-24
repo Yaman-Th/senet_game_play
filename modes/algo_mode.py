@@ -29,7 +29,13 @@ class algorithmMode:
             self._algorithm_turn(self.algo_white)
 
     def render(self):
-        self.renderer.render(self.game.state, self.actions, self.sticks, self.turn, self.best_action, self.algo_black.stats() if self.turn == "Black" else self.algo_white.stats())
+        self.renderer.render(self.game.state,
+                             self.actions,
+                             self.sticks,
+                             self.turn,
+                             self.best_action,
+                             self.algo_black.stats()[0] if self.turn == "Black" else self.algo_white.stats()[0],
+                             self.algo_black.stats()[1] if self.turn == "Black" else self.algo_white.stats()[1])
     
     def _algorithm_turn(self, ai_player):
         sticks = self.game.engine.TossStick()

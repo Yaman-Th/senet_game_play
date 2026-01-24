@@ -13,12 +13,10 @@ class ExpectiMinimaxPlayer:
         self.visited_nodes = 0
         self.visited = []
         self.turn = None
-        self.action_scores = 0
-        self.action = None
+        self.score = 0
         
-    def eminimax(self, state:State, depth:int, node:str, indent=0, is_root=False, is_last=False) -> float: # type: ignore
-        # connector = "└── " if is_last else "├── "
-        # prefix = "    "*indent + ("    " if is_last else "│   ")
+    def eminimax(self, state:State, depth:int, node:str, indent=0, is_root=False) -> float: # type: ignore
+
         print("  " * indent, node)
         
         self.visited_nodes += 1
@@ -35,7 +33,7 @@ class ExpectiMinimaxPlayer:
 
                 next_node = "MAX" if state.current_player == PlayerColor.BLACK else "MIN"
 
-                value = self.eminimax(toss_state, depth - 1, next_node, indent + 1, is_last=True)
+                value = self.eminimax(toss_state, depth - 1, next_node, indent + 1)
                 
                 expected += prob * value
                 
@@ -59,6 +57,7 @@ class ExpectiMinimaxPlayer:
                     best_action = move
             
             if is_root:
+                self.score = best_value
                 return best_action
             
             return best_value
@@ -80,6 +79,7 @@ class ExpectiMinimaxPlayer:
                     best_action = move
             
             if is_root:
+                self.score = best_value
                 return best_action
             
             return best_value
@@ -143,4 +143,4 @@ class ExpectiMinimaxPlayer:
         return black_score - white_score
     
     def stats(self):
-        return self.visited
+        return self.visited, self.score
