@@ -11,6 +11,7 @@ class ExpectiMinimaxPlayer:
         self.game_engine = GameEngine()
         self.probabilities = {1: 4/16, 2: 6/16, 3: 4/16, 4: 1/16, 5: 1/16}
         self.visited_nodes = 0
+        self.visited = []
         self.turn = None
         self.action_scores = 0
         self.action = None
@@ -19,7 +20,6 @@ class ExpectiMinimaxPlayer:
         # connector = "└── " if is_last else "├── "
         # prefix = "    "*indent + ("    " if is_last else "│   ")
         print("  " * indent, node)
-        # print(prefix + connector + node)
         
         self.visited_nodes += 1
         possible_moves = self.game_engine.actions(state)
@@ -93,9 +93,13 @@ class ExpectiMinimaxPlayer:
         
     def best_action_max(self, state:State):
         action = self.eminimax(state, self.depth, "MAX", is_root=True)
+        self.visited.append(self.visited_nodes)
+        self.visited_nodes = 0
         return action
     
     def best_action_min(self, state:State):
+        self.visited.append(self.visited_nodes)
+        self.visited_nodes = 0
         action = self.eminimax(state, self.depth, "MIN", is_root=True)
         return action
 
@@ -139,4 +143,4 @@ class ExpectiMinimaxPlayer:
         return black_score - white_score
     
     def stats(self):
-        return self.visited_nodes
+        return self.visited

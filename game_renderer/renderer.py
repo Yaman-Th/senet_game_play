@@ -95,7 +95,8 @@ class Renderer:
             29      : pygame.image.load(join('images', 'two.png'    )).convert_alpha(),   # two steps
             30      : pygame.image.load(join('images', 'go.png'     )).convert_alpha(),   # any step to go
              0      : pygame.image.load(join('images', 'target.png' )).convert_alpha(),   # final goal
-            "sticks": pygame.image.load(join('images', 'stick.png'  )).convert_alpha(),   # 4 sticks 
+            "sticks": pygame.image.load(join('images', 'stick.png'  )).convert_alpha(),   # 4 sticks
+            "title": pygame.image.load(join('images', 'title.png'  )).convert_alpha(),   # 4 sticks
             }
     
     def render(self, state:State, actions, sticks, turn, best_action, visited_nodes):
@@ -373,15 +374,23 @@ class Renderer:
         # text_surface_1 = self.sticks_font.render(f"actions: {actions}", True, self.data.colors['black'])
         text_surface_2 = self.sticks_font.render(f"Sticks: {sticks}", True, self.data.colors['black'])
         text_surface_3 = self.sticks_font.render(f"{turn} is Thinking!", True, self.data.colors['black'])
-        text_surface_4 = self.sticks_font.render(f"last_action: {best_action}", True, self.data.colors['black'])
-        text_surface_5 = self.sticks_font.render(f"visited_nodes: {visited_nodes}", True, self.data.colors['black'])
+        text_surface_4 = self.sticks_font.render(f"Action: {best_action} >>> {best_action + sticks}", True, self.data.colors['black'])
         
         text_rect = text_surface.get_rect(centerx=rect.centerx, bottom=rect.bottom - 10)
         # text_rect_1 = text_surface_1.get_rect(centerx=rect.centerx, y=rect.centery-50)
         text_rect_2 = text_surface_2.get_rect(centerx=rect.centerx, bottom=rect.bottom - 50)
         text_rect_3 = text_surface_3.get_rect(centerx=rect.centerx, bottom=rect.bottom - 75)
         text_rect_4 = text_surface_4.get_rect(centerx=rect.centerx, bottom=rect.bottom - 100)
+        
+        text_surface_5 = self.sticks_font.render(f"Visited_Nodes: {visited_nodes[-1]}", True, self.data.colors['black'])
         text_rect_5 = text_surface_5.get_rect(centerx=rect.centerx, bottom=rect.bottom - 125)
+        self.screen.blit(text_surface_5, text_rect_5)
+        # x = 0
+        # for i in range(0, 2):
+        #     x += 5
+        #     text_surface_5 = self.sticks_font.render(f"{visited_nodes[-i]}, ", True, self.data.colors['black'])
+        #     text_rect_5 = text_surface_5.get_rect(left=text_rect_5.right + x, bottom=rect.bottom - 125)
+        #     self.screen.blit(text_surface_5, text_rect_5)
         
         
         self.screen.blit(text_surface, text_rect)
@@ -389,13 +398,17 @@ class Renderer:
         self.screen.blit(text_surface_2, text_rect_2)
         self.screen.blit(text_surface_3, text_rect_3)
         self.screen.blit(text_surface_4, text_rect_4)
-        self.screen.blit(text_surface_5, text_rect_5)
-        
         
     def draw_title(self):
         r, c = 0, 2
         x, y = self.data.get_coordinate(r, c)
-        w, h = self.data.get_length(7) - self.data.margin, self.data.get_length(2) - self.data.margin*2
+        rect_w, rect_h = self.data.get_length(7) - self.data.margin, self.data.get_length(2) - self.data.margin*2
+        w, h = rect_w, rect_h
         
-        rect = pygame.Rect(x, y, w, h).move(self.data.margin, self.data.margin)
+        rect = pygame.Rect(x, y, rect_w, rect_h).move(self.data.margin, self.data.margin)
         pygame.draw.rect(self.screen, self.data.colors['light'], rect, border_radius=20)
+            
+        image = pygame.transform.scale(self.IMAGES['title'], (w, h))
+        image_center = self.data.get_center(x=rect.x, y=rect.y, cell_w=rect_w - w, cell_h=rect_h - h)
+
+        self.screen.blit(image, image_center)

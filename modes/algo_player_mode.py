@@ -9,10 +9,10 @@ class algorithmPlayerMode:
         self.game = game
         self.algo = ExpectiMinimaxPlayer(2)
         self.renderer = Renderer()
-        self.sticks = None
+        self.sticks = 0
         self.turn = None
         self.actions = None
-        self.best_action = None
+        self.best_action = 0
         
     def processInput(self, events):
         if self.game.state.current_player == PlayerColor.WHITE:

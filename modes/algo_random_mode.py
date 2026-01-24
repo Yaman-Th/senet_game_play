@@ -2,13 +2,19 @@ from game_state import PlayerColor
 # from algorithms.expectiminimax import ExpectiMinimaxPlayer
 from algorithms.algorithm import ExpectiMinimaxPlayer
 import random
+from game_renderer.renderer import Renderer
 from copy import deepcopy
 
 class algorithmAndRandMode:
     """Class that contain game loop (algorithm vs algorithm)"""
     def __init__(self, game):
         self.game = game
-        self.algo_black = ExpectiMinimaxPlayer(4)
+        self.renderer = Renderer()
+        self.algo_black = ExpectiMinimaxPlayer(2)
+        self.sticks = None
+        self.actions = None
+        self.action = None
+        self.turn = None
         # self.algo_white = ExpectiMinimaxPlayer(PlayerColor.WHITE)
         
     def processInput(self, events):
@@ -16,22 +22,30 @@ class algorithmAndRandMode:
     
     def update(self):
         if self.game.state.current_player == PlayerColor.BLACK:
+            self.turn = "Black"
             self._algorithm_turn(self.algo_black)
         elif self.game.state.current_player == PlayerColor.WHITE:
+            self.turn = "White"
             # self._algorithm_turn(self.algo_white)
             self._random_agent_turn()
 
     def _algorithm_turn(self, ai_player):
         sticks = self.game.engine.TossStick()
         self.game.state.sticks = sticks
+        self.sticks = sticks
         self.game.engine.handle_special_houses(self.game.state)
 
-        if not self.game.engine.actions(self.game.state):
+        actions = self.game.engine.actions(self.game.state)
+        
+        if not actions:
             self.game.state.change_player()
             return
         
+        self.actions = actions
+        
         ai_state = deepcopy(self.game.state)
         best_action = ai_player.best_action(ai_state)
+        self.action = best_action
         
         if best_action and best_action is not None:
             self.game.action = best_action
@@ -42,6 +56,7 @@ class algorithmAndRandMode:
     
     def _random_agent_turn(self):
         sticks = self.game.engine.TossStick()
+        self.sticks = sticks
         self.game.state.sticks = sticks
         self.game.engine.handle_special_houses(self.game.state)
 
@@ -49,9 +64,10 @@ class algorithmAndRandMode:
         if not actions:
             self.game.state.change_player()
             return
-        
+        self.actions = actions
         # best_action = ai_player.find_best_move(self.game.state)
         action = random.choice(list(actions))
+        self.action = action
         
         if action and action is not None:
             self.game.action = action
@@ -59,3 +75,11 @@ class algorithmAndRandMode:
             if new_state is not None:
                 self.game.state = new_state
                 self.game.action = None
+    
+    def render(self):
+        self.renderer.render(self.game.state,
+                             self.actions,
+                             self.sticks,
+                             self.turn,
+                             self.action,
+                             self.algo_black.stats())
