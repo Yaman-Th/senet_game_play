@@ -119,9 +119,9 @@ class ExpectiMinimaxPlayer:
             elif pawn_pos == House_of_Happiness:
                 score += 40
             elif pawn_pos == House_of_Three:
-                score -= 25
-            elif pawn_pos == House_of_Atom:
                 score -= 30
+            elif pawn_pos == House_of_Atom:
+                score -= 20
             else:
                 score += pawn_pos
 
