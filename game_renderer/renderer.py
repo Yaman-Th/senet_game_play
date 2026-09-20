@@ -1,7 +1,8 @@
+import os
 import pygame
 import pygame.gfxdraw
-from game_state import State, PlayerColor
 from os.path import join
+from game_state import State, PlayerColor
 
 class Data:
     def __init__(self, cell, margin):
@@ -32,7 +33,8 @@ class Data:
             (1, 9): 11, (1, 8): 12, (1, 7): 13, (1, 6): 14, (1, 5): 15, (1, 4): 16, (1, 3): 17, (1, 2): 18, (1, 1): 19, (1, 0): 20,
             (2, 0): 21, (2, 1): 22, (2, 2): 23, (2, 3): 24, (2, 4): 25, (2, 5): 26, (2, 6): 27, (2, 7): 28, (2, 8): 29, (2, 9): 30, (2, 11): 31
         }
-        self.win_sfx = pygame.mixer.Sound("wow.mp3")
+        audio_path = os.path.join("audio", "wow.mp3")
+        self.win_sfx = pygame.mixer.Sound(str(audio_path))
         self.win_sfx.set_volume(1)
         
     def get_length(self, repeat):
@@ -157,9 +159,6 @@ class Renderer:
             rect = pygame.Rect(x, y, self.data.cell, self.data.cell).move(self.data.grid_x, self.data.grid_y)
             
             pygame.draw.rect(self.screen, color, rect, border_radius=20)
-            
-            # if rect.collidepoint(self.mouse_pos):
-            #     pygame.draw.rect(self.screen, self.data.colors['orange'], rect, 5, border_radius=20)
                   
     def draw_players(self, state):
         
@@ -170,8 +169,6 @@ class Renderer:
             player_center =  self.data.get_center(x, y, self.data.cell, self.data.cell)
             pygame.gfxdraw.filled_circle(self.screen, player_center[0], player_center[1], self.playerRadius, self.data.colors['white'])
             pygame.gfxdraw.aacircle(self.screen, player_center[0], player_center[1], self.playerRadius, self.data.colors['white'])
-            
-            # pygame.draw.circle(self.screen, self.data.colors['white'], player_center, self.playerRadius)
         
         for pos in state.black_positions :            
             r, c = self.data.positions[pos][0], self.data.positions[pos][1]
@@ -181,8 +178,6 @@ class Renderer:
             
             pygame.gfxdraw.filled_circle(self.screen, player_center[0], player_center[1], self.playerRadius, self.data.colors['black'])
             pygame.gfxdraw.aacircle(self.screen, player_center[0], player_center[1], self.playerRadius, self.data.colors['black'])
-                
-            # pygame.draw.circle(self.screen, self.data.colors['black'], player_center, self.playerRadius)
     
     def draw_elements(self):
         for key, value in self.data.elements.items():
@@ -355,8 +350,6 @@ class Renderer:
                 return cell
             
     def draw_winner(self, winner:str):
-        # r, c = self.data.positions[1]
-        # x, y = self.data.get_coordinate(r, c)
         x, y =0, 0
         
         rect = pygame.Rect(x, y, self.screen_w, self.screen_h)

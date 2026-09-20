@@ -1,9 +1,8 @@
 from math import inf
-from game_state import State, PlayerColor
+from copy import deepcopy
 from game_engine import GameEngine
 from game_renderer import renderer
-from copy import deepcopy
-
+from game_state import State, PlayerColor
 
 class ExpectiMinimaxPlayer:
     def __init__(self, depth: int):
@@ -15,7 +14,7 @@ class ExpectiMinimaxPlayer:
         self.turn = None
         self.score = 0
         
-    def eminimax(self, state:State, depth:int, node:str, indent=0, is_root=False) -> float: # type: ignore
+    def eminimax(self, state:State, depth:int, node:str, indent=0, is_root=False) -> float:
 
         print("  " * indent, node)
         
@@ -102,7 +101,6 @@ class ExpectiMinimaxPlayer:
         self.visited_nodes = 0
         action = self.eminimax(state, self.depth, "MIN", is_root=True)
         return action
-
 
     def _get_player_score(self, positions:set) -> float:
         score = 0.0

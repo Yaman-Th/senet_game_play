@@ -1,7 +1,9 @@
+import os
 import pygame
-from game_renderer.renderer import Renderer
 from game import State
 from game_state import PlayerColor
+from game_renderer.renderer import Renderer
+
 class PLayerMode:
     """Class that contain game loop (player vs player)"""
     def __init__(self, game):
@@ -9,9 +11,13 @@ class PLayerMode:
         self.renderer = Renderer()
         self.sticks = 0
         self.action = 0
+        audio_path = os.path.join("audio", "move.wav")
+        self.jump_sfx = pygame.mixer.Sound(str(audio_path))
+        self.jump_sfx.set_volume(1)
+        another_audio_path = os.path.join("audio", "toss.mp3")
+        self.toss_sfx = pygame.mixer.Sound(str(another_audio_path))
+        self.toss_sfx.set_volume(1)
     
-    # def _get_player(self, state:State):
-    #     return "Black" if state.current_player == PlayerColor
     def processInput(self, events):
         for event in events:      
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -21,9 +27,12 @@ class PLayerMode:
                     self.game.state,
                     self.game.engine.actions(self.game.state)
                 )
+                self.jump_sfx.play()
+                
                 if click_value == None:
                     return
                 elif click_value == -1:
+                    self.toss_sfx.play()
                     sticks = self.game.engine.TossStick()
                     self.game.state.sticks = sticks
                     self.sticks = sticks

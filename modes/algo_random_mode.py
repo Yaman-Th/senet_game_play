@@ -1,10 +1,10 @@
-from game_state import PlayerColor
-import pygame
-# from algorithms.expectiminimax import ExpectiMinimaxPlayer
-from algorithms.algorithm import ExpectiMinimaxPlayer
+import os
 import random
-from game_renderer.renderer import Renderer
+import pygame
 from copy import deepcopy
+from game_state import PlayerColor
+from game_renderer.renderer import Renderer
+from algorithms.algorithm import ExpectiMinimaxPlayer
 
 class algorithmAndRandMode:
     """Class that contain game loop (algorithm vs algorithm)"""
@@ -16,7 +16,8 @@ class algorithmAndRandMode:
         self.actions = None
         self.action = None
         self.turn = None
-        self.jump_sfx = pygame.mixer.Sound("move.wav")
+        audio_path = os.path.join("audio", "move.wav")
+        self.jump_sfx = pygame.mixer.Sound(str(audio_path))
         self.jump_sfx.set_volume(1)
         
     def processInput(self, events):
@@ -67,7 +68,6 @@ class algorithmAndRandMode:
             self.game.state.change_player()
             return
         self.actions = actions
-        # best_action = ai_player.find_best_move(self.game.state)
         action = random.choice(list(actions))
         self.jump_sfx.play()
         self.action = action
