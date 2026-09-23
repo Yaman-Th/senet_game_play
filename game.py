@@ -6,14 +6,13 @@ from game_state import State
 from game_engine import GameEngine
 from modes.player_mode import PLayerMode
 from modes.algo_mode import algorithmMode
-from game_renderer.renderer import Renderer
 from modes.algo_player_mode import algorithmPlayerMode
 from modes.algo_random_mode import algorithmAndRandMode
 
 class Mode(Enum):
     PLAYER_MODE = auto()
-    ALGORITHM_AND_PLAYER_MODE = auto()
     ALGORITHM_MODE = auto()
+    ALGORITHM_AND_PLAYER_MODE = auto()
     ALGORITHM_AND_RANDOM_MODE = auto()
 
 class Game:
@@ -22,12 +21,12 @@ class Game:
     and contain the Game Loop
     e.g: Game -> PLayer_mode
               -> algo_player_mode
+              -> algo_random_mode
               -> algorithm_mode
     """
     def __init__(self, mode:Mode):
         pygame.init()
         self.mode = self._create_mode_instance(mode)
-        # self.renderer = Renderer()
         self.engine = GameEngine()
         self.initial_state = State()
         self.state = deepcopy(self.initial_state)

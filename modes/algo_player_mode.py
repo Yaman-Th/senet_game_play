@@ -1,8 +1,9 @@
+import os
 import pygame
 from game_state import PlayerColor
-# from algorithms.expectiminimax import ExpectiMinimaxPlayer
-from algorithms.algorithm import ExpectiMinimaxPlayer
 from game_renderer.renderer import Renderer
+from algorithms.algorithm import ExpectiMinimaxPlayer
+
 class algorithmPlayerMode:
     """Class that contain game loop (algorithm vs player)"""
     def __init__(self, game):
@@ -13,10 +14,12 @@ class algorithmPlayerMode:
         self.turn = None
         self.actions = None
         self.best_action = 0
-        self.jump_sfx = pygame.mixer.Sound("move.wav")
-        self.toss_sfx = pygame.mixer.Sound("toss.mp3")
-        self.toss_sfx.set_volume(1)
+        audio_path = os.path.join("audio", "move.wav")
+        self.jump_sfx = pygame.mixer.Sound(str(audio_path))
         self.jump_sfx.set_volume(1)
+        another_audio_path = os.path.join("audio", "toss.mp3")
+        self.toss_sfx = pygame.mixer.Sound(str(another_audio_path))
+        self.toss_sfx.set_volume(1)
         
     def processInput(self, events):
         if self.game.state.current_player == PlayerColor.WHITE:
@@ -54,7 +57,6 @@ class algorithmPlayerMode:
         
     def _algorithm_turn(self):
         sticks = self.game.engine.TossStick()
-        # self.toss_sfx.play()
         self.sticks = sticks
         self.game.state.sticks = sticks
         self.game.engine.handle_special_houses(self.game.state)
@@ -64,9 +66,7 @@ class algorithmPlayerMode:
         if not actions:
             self.game.state.change_player()
             return
-        
-        # self.actions = actions
-        
+                
         best_action = self.algo.best_action(self.game.state)
         self.best_action = best_action
         self.jump_sfx.play()
